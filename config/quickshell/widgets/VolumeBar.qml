@@ -244,7 +244,7 @@ ShellRoot {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.topMargin: -16
                     text: root.muted ? "MUTE" : Math.round(root.volume * 100) + "%"
-                    font.family: "Share Tech Mono"
+                    font.family: "JetBrains Mono"
                     font.pixelSize: 9
                     font.letterSpacing: 2
                     color: root.colFilled

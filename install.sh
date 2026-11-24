@@ -17,7 +17,11 @@ readonly CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 # Relative to $CONFIG_HOME.
 readonly PRESERVED_FILES=(
     "hypr/user.conf"
+    "hypr/user.lua"                       # personal overrides (Hyprland 0.57+ Lua config)
+    "hypr/monitors.lua"                   # written by Control Center > System > Display
+    "hypr/hypridle.conf"                  # written by Control Center > System > Lock & Idle
     "quickshell/settings/Settings.qml"
+    "quickshell/settings/user.json"       # Control Center settings
 )
 
 # Add support for flags
@@ -307,6 +311,26 @@ EOF
         ok "Created empty user.conf for your personal overrides."
     else
         ok "Existing user.conf preserved."
+    fi
+
+    # Same for Hyprland 0.57+ (Lua config): hyprland.lua loads unit3.lua, then user.lua.
+    local user_lua="$CONFIG_HOME/hypr/user.lua"
+    if [[ ! -f "$user_lua" ]]; then
+        cat > "$user_lua" <<'EOF'
+-- ═══════════════════════════════════════════════════════════════════
+-- Personal Hyprland overrides (Lua, Hyprland 0.57+)
+-- Created empty by the installer and NEVER overwritten by updates.
+-- Loaded after hyprland.lua and unit3.lua, so anything here wins.
+--
+-- Examples:
+--   hl.bind("SUPER + B", hl.dsp.exec_cmd("firefox"))
+--   hl.env("GTK_THEME", "Adwaita-dark")
+--   hl.on("hyprland.start", function() hl.exec_cmd("my-app") end)
+-- ═══════════════════════════════════════════════════════════════════
+EOF
+        ok "Created empty user.lua for your personal overrides."
+    else
+        ok "Existing user.lua preserved."
     fi
 }
 

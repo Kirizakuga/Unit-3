@@ -246,16 +246,16 @@ Item {
                               leftMargin:28; rightMargin:28 }
                     Row {
                         spacing:14; anchors.verticalCenter:parent.verticalCenter
-                        Text { text:"SYSTEM"; font.pixelSize:11; font.letterSpacing:3.5; font.weight:Font.Medium; color:root.inkStrong }
+                        Text { font.family: "JetBrains Mono"; text:"SYSTEM"; font.pixelSize:11; font.letterSpacing:3.5; font.weight:Font.Medium; color:root.inkStrong }
                         Rectangle { width:24; height:1; color:root.inkSoft; anchors.verticalCenter:parent.verticalCenter }
-                        Text { text:"システム"; font.pixelSize:10; font.letterSpacing:2; color:root.inkSoft }
+                        Text { font.family: "JetBrains Mono"; text:"システム"; font.pixelSize:10; font.letterSpacing:2; color:root.inkSoft }
                     }
                     Item { width:parent.width - 340; height:1 }
                     Row {
                         spacing:14; anchors.verticalCenter:parent.verticalCenter
                         Item {
                             width:120; height:16; clip:true
-                            Text {
+                            Text { font.family: "JetBrains Mono";
                                 id:lhTick
                                 text: root.clockStr + " · " + root.apps.length + " APPS · "
                                 font.pixelSize:9; font.letterSpacing:1.5; color:root.inkSoft; y:2
@@ -265,7 +265,7 @@ Item {
                                 }
                             }
                         }
-                        Text { text:"SESSION 0471"; font.pixelSize:9; font.letterSpacing:2.5; color:root.inkSoft }
+                        Text { font.family: "JetBrains Mono"; text:"SESSION 0471"; font.pixelSize:9; font.letterSpacing:2.5; color:root.inkSoft }
                     }
                 }
                 Rectangle { anchors.bottom:parent.bottom; width:parent.width; height:1; color:root.lineSoft }
@@ -306,7 +306,7 @@ Item {
                                         Behavior on width { NumberAnimation { duration:200; easing.type:Easing.OutQuart } }
                                         Behavior on color { ColorAnimation { duration:150 } }
                                     }
-                                    Text {
+                                    Text { font.family: "JetBrains Mono";
                                         anchors.verticalCenter:parent.verticalCenter
                                         text: root.catLabels[modelData] || modelData.toUpperCase()
                                         font.pixelSize:10; font.letterSpacing:2
@@ -314,7 +314,7 @@ Item {
                                         Behavior on color { ColorAnimation { duration:150 } }
                                     }
                                 }
-                                Text {
+                                Text { font.family: "JetBrains Mono";
                                     anchors { right:parent.right; rightMargin:12; verticalCenter:parent.verticalCenter }
                                     text: root.apps.filter(function(a){ return modelData==="all"||a.cat===modelData }).length.toString().padStart(2,"0")
                                     font.pixelSize:9; font.letterSpacing:1
@@ -330,7 +330,7 @@ Item {
                             Column {
                                 anchors { left:parent.left; leftMargin:22; bottom:parent.bottom; bottomMargin:6 }
                                 spacing:4
-                                Text { text:root.filteredApps.length+"/"+root.apps.length+" NODES"; font.pixelSize:8; font.letterSpacing:2; color:root.inkSoft; opacity:0.6 }
+                                Text { font.family: "JetBrains Mono"; text:root.filteredApps.length+"/"+root.apps.length+" NODES"; font.pixelSize:8; font.letterSpacing:2; color:root.inkSoft; opacity:0.6 }
                                 Rectangle {
                                     width:72; height:2; color:root.lineSoft
                                     Rectangle {
@@ -361,13 +361,13 @@ Item {
                                 anchors { left:parent.left; right:parent.right; verticalCenter:parent.verticalCenter
                                           leftMargin:24; rightMargin:24 }
                                 spacing:10
-                                Text { anchors.verticalCenter:parent.verticalCenter; text:"▸"; font.pixelSize:12; color:root.accent }
+                                Text { font.family: "JetBrains Mono"; anchors.verticalCenter:parent.verticalCenter; text:"▸"; font.pixelSize:12; color:root.accent }
                                 FocusScope {
                                     id:searchScope; width:parent.width-60; height:30
                                     anchors.verticalCenter:parent.verticalCenter
                                     focus: root.menuOpen
 
-                                    TextInput {
+                                    TextInput { font.family: "JetBrains Mono";
                                         id:           searchInput
                                         anchors.fill: parent
                                         verticalAlignment: TextInput.AlignVCenter
@@ -394,7 +394,7 @@ Item {
                                             if(a) root.launchApp(a.desktopId)
                                         }
 
-                                        Text {
+                                        Text { font.family: "JetBrains Mono";
                                             visible:parent.text===""
                                             anchors.verticalCenter:parent.verticalCenter
                                             text:"search application..."
@@ -442,7 +442,7 @@ Item {
                                     spacing:14
                                     Behavior on anchors.leftMargin { NumberAnimation { duration:180; easing.type:Easing.OutQuart } }
 
-                                    Text {
+                                    Text { font.family: "JetBrains Mono";
                                         anchors.verticalCenter:parent.verticalCenter
                                         text:modelData.id; width:22; font.pixelSize:9; font.letterSpacing:1.5
                                         color: appMA.containsMouse||appDelegate.isFocused ? Qt.rgba(214/255,207/255,181/255,0.5) : root.inkSoft
@@ -454,7 +454,7 @@ Item {
                                         border.color: appMA.containsMouse||appDelegate.isFocused ? Qt.rgba(214/255,207/255,181/255,0.8) : root.ink
                                         border.width:1
                                         Behavior on border.color { ColorAnimation { duration:120 } }
-                                        Text {
+                                        Text { font.family: "JetBrains Mono";
                                             anchors.centerIn:parent; text:modelData.icon; font.pixelSize:12
                                             color: appMA.containsMouse||appDelegate.isFocused ? Qt.rgba(214/255,207/255,181/255,0.9) : root.ink
                                             Behavior on color { ColorAnimation { duration:120 } }
@@ -462,26 +462,26 @@ Item {
                                     }
                                     Column {
                                         anchors.verticalCenter:parent.verticalCenter; spacing:2
-                                        Text {
+                                        Text { font.family: "JetBrains Mono";
                                             text:modelData.name; font.pixelSize:12; font.letterSpacing:1.2; font.weight:Font.Medium
                                             color: appMA.containsMouse||appDelegate.isFocused ? Qt.rgba(214/255,207/255,181/255,1) : root.ink
                                             Behavior on color { ColorAnimation { duration:120 } }
                                         }
-                                        Text {
+                                        Text { font.family: "JetBrains Mono";
                                             text:modelData.meta; font.pixelSize:9; font.letterSpacing:1.5
                                             color: appMA.containsMouse||appDelegate.isFocused ? Qt.rgba(214/255,207/255,181/255,0.5) : root.inkSoft
                                             Behavior on color { ColorAnimation { duration:120 } }
                                         }
                                     }
                                     Item { width:appList.width-310; height:1 }
-                                    Text {
+                                    Text { font.family: "JetBrains Mono";
                                         anchors.verticalCenter:parent.verticalCenter
                                         text:(root.catLabels[modelData.cat]||modelData.cat).toUpperCase()
                                         font.pixelSize:9; font.letterSpacing:2
                                         color: appMA.containsMouse||appDelegate.isFocused ? Qt.rgba(214/255,207/255,181/255,0.4) : root.inkSoft
                                         Behavior on color { ColorAnimation { duration:120 } }
                                     }
-                                    Text {
+                                    Text { font.family: "JetBrains Mono";
                                         anchors.verticalCenter:parent.verticalCenter
                                         text:"▸"; font.pixelSize:14; color:root.accent
                                         opacity: appMA.containsMouse||appDelegate.isFocused ? 1 : 0
@@ -499,7 +499,7 @@ Item {
                             Item {
                                 visible: root.filteredApps.length===0 && root.appsLoaded
                                 width:appList.width; height:60
-                                Text { anchors.centerIn:parent; text:"▸ NO RESULTS"; font.pixelSize:10; font.letterSpacing:3; color:root.inkSoft; opacity:0.5 }
+                                Text { font.family: "JetBrains Mono"; anchors.centerIn:parent; text:"▸ NO RESULTS"; font.pixelSize:10; font.letterSpacing:3; color:root.inkSoft; opacity:0.5 }
                             }
                         }
                     }
@@ -529,7 +529,7 @@ Item {
                                     anchors{left:parent.left;top:parent.top;bottom:parent.bottom}
                                     width:1; color:root.lineSoft
                                 }
-                                Text {
+                                Text { font.family: "JetBrains Mono";
                                     id:faLbl; anchors.centerIn:parent
                                     text:modelData.l; font.pixelSize:9; font.letterSpacing:2.5
                                     color: faMA.containsMouse ? (modelData.danger===true ? root.accent : root.inkStrong) : root.inkSoft
@@ -554,9 +554,9 @@ Item {
                                 Rectangle {
                                     width:kbdT.implicitWidth+8; height:16; color:"transparent"
                                     border.color:root.lineSoft; border.width:1
-                                    Text { id:kbdT; anchors.centerIn:parent; text:modelData[0]; font.pixelSize:9; font.letterSpacing:1; color:root.ink }
+                                    Text { font.family: "JetBrains Mono"; id:kbdT; anchors.centerIn:parent; text:modelData[0]; font.pixelSize:9; font.letterSpacing:1; color:root.ink }
                                 }
-                                Text { text:modelData[1]; anchors.verticalCenter:parent.verticalCenter; font.pixelSize:9; font.letterSpacing:2; color:root.inkSoft }
+                                Text { font.family: "JetBrains Mono"; text:modelData[1]; anchors.verticalCenter:parent.verticalCenter; font.pixelSize:9; font.letterSpacing:2; color:root.inkSoft }
                             }
                         }
                     }

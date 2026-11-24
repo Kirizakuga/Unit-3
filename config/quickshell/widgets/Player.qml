@@ -80,7 +80,7 @@ Item {
                         id:   ticker
                         text: "NR-2B // " + root.mpArtist + " // " + root.mpTitle
                               + " // LOSSLESS 48kHz/24bit // NOW PLAYING //\u00a0"
-                        font.family: "Share Tech Mono"
+                        font.family: "JetBrains Mono"
                         font.pixelSize: s(8)
                         font.letterSpacing: 1
                         color: Qt.rgba(200/255,184/255,154/255,0.2)
@@ -400,7 +400,7 @@ Item {
                                 id:    ciTitle
                                 width: parent.width
                                 text:  root.mpTitle
-                                font.family: "Share Tech Mono"
+                                font.family: "JetBrains Mono"
                                 font.pixelSize: 9
                                 font.letterSpacing: 1.5
                                 color: Qt.rgba(200/255,184/255,154/255,0.9)
@@ -424,7 +424,7 @@ Item {
                                 id:    ciArtist
                                 width: parent.width
                                 text:  root.mpArtist
-                                font.family: "Share Tech Mono"
+                                font.family: "JetBrains Mono"
                                 font.pixelSize: 7
                                 font.letterSpacing: 1
                                 color: Qt.rgba(200/255,184/255,154/255,0.42)
@@ -449,7 +449,7 @@ Item {
                                             id: tagTxt
                                             anchors.centerIn: parent
                                             text: modelData
-                                            font.family: "Share Tech Mono"
+                                            font.family: "JetBrains Mono"
                                             font.pixelSize: 6
                                             font.letterSpacing: 1
                                             color: index < 2
@@ -471,7 +471,7 @@ Item {
                                     id: prevBtn
                                     svgIcon: true
                                     onClicked: root.prevTrack()
-                                    Text {
+                                    Text { font.family: "JetBrains Mono";
                                         anchors.centerIn: parent
                                         text: "◀"; font.pixelSize: 9
                                         color: prevBtn.textColor
@@ -487,7 +487,7 @@ Item {
                                     Text {
                                         anchors.centerIn: parent
                                         text: root.mpPlaying ? "PAUSE" : "PLAY"
-                                        font.family: "Share Tech Mono"
+                                        font.family: "JetBrains Mono"
                                         font.pixelSize: 7
                                         font.letterSpacing: 1
                                         color: playBtn.textColor
@@ -500,7 +500,7 @@ Item {
                                     id: nextBtn
                                     svgIcon: true
                                     onClicked: root.nextTrack()
-                                    Text {
+                                    Text { font.family: "JetBrains Mono";
                                         anchors.centerIn: parent
                                         text: "▶"; font.pixelSize: 9
                                         color: nextBtn.textColor
@@ -522,13 +522,13 @@ Item {
                         Text {
                             anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: 0 }
                             text: root.fmtTime(root.mpPosition)
-                            font.family: "Share Tech Mono"; font.pixelSize: 7; font.letterSpacing: 1
+                            font.family: "JetBrains Mono"; font.pixelSize: 7; font.letterSpacing: 1
                             color: Qt.rgba(200/255,184/255,154/255,0.2)
                         }
                         Text {
                             anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 0 }
                             text: root.fmtTime(root.mpLength)
-                            font.family: "Share Tech Mono"; font.pixelSize: 7; font.letterSpacing: 1
+                            font.family: "JetBrains Mono"; font.pixelSize: 7; font.letterSpacing: 1
                             color: Qt.rgba(200/255,184/255,154/255,0.2)
                         }
                     }
@@ -613,7 +613,7 @@ Item {
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: root.mpPlaying ? "STREAMING" : "IDLE"
-                                font.family: "Share Tech Mono"; font.pixelSize: 6; font.letterSpacing: 1
+                                font.family: "JetBrains Mono"; font.pixelSize: 6; font.letterSpacing: 1
                                 color: Qt.rgba(200/255,184/255,154/255,0.15)
                             }
                         }
@@ -623,7 +623,7 @@ Item {
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: root.clockStr
-                            font.family: "Share Tech Mono"; font.pixelSize: 6; font.letterSpacing: 1
+                            font.family: "JetBrains Mono"; font.pixelSize: 6; font.letterSpacing: 1
                             color: Qt.rgba(200/255,184/255,154/255,0.15)
                         }
 
@@ -632,7 +632,7 @@ Item {
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "LOSSLESS 48k"
-                            font.family: "Share Tech Mono"; font.pixelSize: 6; font.letterSpacing: 1
+                            font.family: "JetBrains Mono"; font.pixelSize: 6; font.letterSpacing: 1
                             color: Qt.rgba(200/255,184/255,154/255,0.15)
                         }
                     }

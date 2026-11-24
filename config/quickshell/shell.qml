@@ -14,6 +14,7 @@ ShellRoot {
 
     // ── CONTROLCENTER ──
     ControlCenter {}
+    AltTab {}
 
 
     // ── VOLUMEBAR ──
@@ -111,7 +112,7 @@ ShellRoot {
             screen:modelData
             anchors.top:true;anchors.left:true;anchors.right:true;anchors.bottom:true
             exclusionMode:ExclusionMode.Ignore
-            aboveWindows:menuItem.menuOpen||menuItem.wipeHideRunning
+            aboveWindows:true;visible:menuItem.menuOpen||menuItem.wipeHideRunning
             color:"transparent"
             WlrLayershell.keyboardFocus:menuItem.menuOpen?WlrKeyboardFocus.Exclusive:WlrKeyboardFocus.None
             implicitWidth:modelData.width;implicitHeight:modelData.height
@@ -126,12 +127,12 @@ ShellRoot {
 
     // ── PLAYER ──
     Variants {
-        model:Quickshell.screens
+        model:Settings.playerEnabled ? Quickshell.screens : []
         PanelWindow {
             required property var modelData;screen:modelData
             anchors.top:true;anchors.right:true
             margins.top:Math.round(modelData.height*Settings.playerPositionY);margins.right:20
-            exclusionMode:ExclusionMode.Ignore;aboveWindows:root.playerOnTop;color:"transparent"
+            exclusionMode:ExclusionMode.Ignore;aboveWindows:true;color:"transparent"
             implicitWidth:Settings.playerWidth;implicitHeight:playerItem.implicitHeight
             Player{id:playerItem;anchors.fill:parent
                 mpTitle:root.mpTitle;mpArtist:root.mpArtist;mpCoverUrl:root.mpCoverUrl

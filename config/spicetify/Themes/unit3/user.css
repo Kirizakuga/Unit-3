@@ -1,0 +1,67 @@
+/* Unit-3 theme for Spotify (Spicetify): near-black panels, sand text,
+   JetBrains Mono, and square NieR-style boxes. */
+
+:root, body, button, input, .encore-text {
+    font-family: "JetBrains Mono", monospace !important;
+}
+
+/* Square corners everywhere, like the Unit-3 cards */
+.main-card-card, .main-cardImage-imageWrapper, .main-cardImage-image,
+.main-entityHeader-image, .main-entityHeader-shadow, .main-contextMenu-menu,
+.main-topBar-searchBar, .x-filterBox-expandButton, .encore-text-body-small-bold,
+.main-yourLibraryX-libraryContainer, .Root__main-view, .Root__nav-bar,
+.Root__right-sidebar, .main-nowPlayingView-coverArt, .cover-art, .cover-art-image,
+[class*="ChipInner"], .main-trackList-trackListRow, .main-contextMenu-menuItemButton,
+button[class*="Button"], .x-progressBar-progressBarBg, .x-progressBar-fillColor,
+.progress-bar__bg, .progress-bar__fg_wrapper, .progress-bar__fg {
+    border-radius: 0 !important;
+}
+
+/* Thin ink borders around the main areas */
+.Root__main-view, .Root__nav-bar, .Root__right-sidebar {
+    border: 1px solid #2a2620 !important;
+}
+
+/* Play button, progress bar and active toggles: sand with dark icons */
+.encore-bright-accent-set, .encore-inverted-light-set, .x-progressBar-fillColor {
+    background-color: var(--spice-button-active) !important;
+    color: var(--spice-main) !important;
+}
+
+/* Hover: light sand tint, like the shell menus */
+.main-trackList-trackListRow:hover, .main-contextMenu-menuItemButton:hover,
+.main-card-card:hover {
+    background-color: rgba(200, 184, 154, 0.08) !important;
+}
+
+/* Smooth hover transitions */
+button, .main-trackList-trackListRow, .main-contextMenu-menuItemButton {
+    transition: color 200ms ease, background-color 200ms ease !important;
+}
+
+/* Search bar */
+.main-topBar-searchBar, #recent-searches-dropdown > div {
+    background-color: var(--spice-main-elevated) !important;
+}
+
+/* No coloured gradients behind headers (Spotify tints them from the cover art) */
+.main-entityHeader-backgroundColor, .main-actionBarBackground-background,
+.playlist-playlist-actionBarBackground-background {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+.main-home-filterChipsContainer, .main-topBar-background,
+.main-topBar-background[style*="--background-base"] {
+    --background-base: transparent !important;
+    background: var(--spice-main) !important;
+}
+.main-view-container__scroll-node-child div[style*="--background-base"]:not([style*="--background-base-min-contrast"]) {
+    display: none !important;
+}
+
+/* Scrollbars: thin ink bars */
+.os-scrollbar-handle, .os-theme-spotify .os-scrollbar-handle {
+    background: var(--spice-button-disabled) !important;
+    border-radius: 0 !important;
+    width: 4px;
+}

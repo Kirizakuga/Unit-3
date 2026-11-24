@@ -1,0 +1,10 @@
+#!/bin/sh
+# SDDM X11 setup (runs as root before the greeter). Mirrors the Hyprland layout:
+#   laptop eDP-1 (Hyprland: eDP-2) 1920x1200@165 on the left
+#   LG DisplayPort-0 (Hyprland: DP-1) 2560x1440@200 on the right, primary
+# Falls back to default refresh rates, then to doing nothing, if a mode is unavailable.
+xrandr --output eDP-1 --mode 1920x1200 --rate 165 --pos 0x0 \
+       --output DisplayPort-0 --mode 2560x1440 --rate 200 --pos 1920x0 --primary 2>/dev/null \
+|| xrandr --output eDP-1 --mode 1920x1200 --pos 0x0 \
+          --output DisplayPort-0 --mode 2560x1440 --pos 1920x0 --primary 2>/dev/null \
+|| true

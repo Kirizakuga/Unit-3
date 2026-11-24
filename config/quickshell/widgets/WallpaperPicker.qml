@@ -180,20 +180,20 @@ ShellRoot {
                                 SequentialAnimation on opacity { running:root.frozen; loops:Animation.Infinite
                                     NumberAnimation{to:0.3;duration:900} NumberAnimation{to:1;duration:900} }
                             }
-                            Text{text:"WALLPAPER SELECT";font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                            Text{text:"WALLPAPER SELECT";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
                         }
-                        Text{text:"NODE · "+root.activeMonitor;font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                        Text{text:"NODE · "+root.activeMonitor;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
                     }
                 }
                 Item {
                     anchors{top:parent.top;right:parent.right;topMargin:28;rightMargin:30}
                     z:5; opacity:parent.uiOp
-                    Text{text:root.clockFull;font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                    Text{text:root.clockFull;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
                 }
                 Item {
                     anchors{bottom:parent.bottom;left:parent.left;bottomMargin:28;leftMargin:30}
                     z:5; opacity:parent.uiOp
-                    Text{text:"↑↓ / SCROLL  NAVIGATE  ·  ESC  QUIT";font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                    Text{text:"↑↓ / SCROLL  NAVIGATE  ·  ESC  QUIT";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
                 }
 
                 // ── Boutons apply — toujours visibles ──
@@ -223,7 +223,7 @@ ShellRoot {
 
                             Text {
                                 text: "APPLY WALLPAPER"
-                                font.family:"Share Tech Mono";font.pixelSize:10;font.letterSpacing:3
+                                font.family: "JetBrains Mono";font.pixelSize:10;font.letterSpacing:3
                                 color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter
                             }
                             Rectangle { width:parent.width;height:1;color:Qt.rgba(70/255,63/255,46/255,0.22) }
@@ -239,7 +239,7 @@ ShellRoot {
                                         Behavior on width{NumberAnimation{duration:220}} }
                                     Text { anchors.centerIn:parent
                                         text:"THIS SCREEN"
-                                        font.family:"Share Tech Mono";font.pixelSize:10;font.letterSpacing:2
+                                        font.family: "JetBrains Mono";font.pixelSize:10;font.letterSpacing:2
                                         color:ma1.containsMouse?"#d6cfb5":"#463f2e"
                                         Behavior on color{ColorAnimation{duration:200}} }
                                     MouseArea { id:ma1;anchors.fill:parent;hoverEnabled:true
@@ -254,7 +254,7 @@ ShellRoot {
                                         Behavior on width{NumberAnimation{duration:220}} }
                                     Text { anchors.centerIn:parent
                                         text:"ALL SCREENS"
-                                        font.family:"Share Tech Mono";font.pixelSize:10;font.letterSpacing:2
+                                        font.family: "JetBrains Mono";font.pixelSize:10;font.letterSpacing:2
                                         color:ma2.containsMouse?"#d6cfb5":"#463f2e"
                                         Behavior on color{ColorAnimation{duration:200}} }
                                     MouseArea { id:ma2;anchors.fill:parent;hoverEnabled:true
@@ -383,7 +383,7 @@ ShellRoot {
                                     Text {
                                         anchors.centerIn: parent
                                         text: root.wallpapers[thumb.wIdx]
-                                        font.family: "Share Tech Mono"
+                                        font.family: "JetBrains Mono"
                                         font.pixelSize: 8
                                         color: "#c8b89a"
                                     }

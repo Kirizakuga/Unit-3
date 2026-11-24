@@ -21,7 +21,7 @@ QtObject {
   readonly property color lnm:    Qt.rgba(200/255, 184/255, 154/255, 0.22)
 
   // Font
-  readonly property string mono:  "Share Tech Mono"
+  readonly property string mono:  "JetBrains Mono"
 
   // Timings animations
   readonly property int durationFast:   150

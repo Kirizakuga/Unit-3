@@ -1,0 +1,11 @@
+# Unit-3: keep sand (paleorange) folder icons after every Papirus update.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = papirus-icon-theme
+
+[Action]
+Description = Unit-3: re-applying sand folder icons...
+When = PostTransaction
+Exec = /usr/bin/papirus-folders -C paleorange --theme Papirus-Dark

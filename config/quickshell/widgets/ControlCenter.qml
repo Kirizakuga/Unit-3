@@ -51,7 +51,12 @@ ShellRoot {
         left:   [ {key:"send",      label:"Send"},
                   {key:"receive",   label:"Receive"} ],
         right:  [ {key:"history",   label:"History"},
-                  {key:"dnd",       label:"Do Not Disturb"} ]
+                  {key:"dnd",       label:"Do Not Disturb"},
+                  {key:"display",   label:"Display"},
+                  {key:"lock",      label:"Lock & Idle"},
+                  {key:"power",     label:"Power"},
+                  {key:"shell",     label:"Shell"},
+                  {key:"update",    label:"Update"} ]
     })
 
     readonly property var details: ({
@@ -70,7 +75,12 @@ ShellRoot {
         "right.history":    {h3:"Notification History",status:"—",    on:false,
                               actions:[{key:"placeholder",label:"Sub-menu coming"}]},
         "right.dnd":        {h3:"Do Not Disturb",      status:"—",    on:false,
-                              actions:[{key:"placeholder",label:"Sub-menu coming"}]}
+                              actions:[{key:"placeholder",label:"Sub-menu coming"}]},
+        "right.display":    {h3:"Display",  status:"—", on:true,  actions:[]},
+        "right.lock":       {h3:"Lock & Idle", status:"—", on:true, actions:[]},
+        "right.power":      {h3:"Power",    status:"—", on:true,  actions:[]},
+        "right.shell":      {h3:"Shell",    status:"—", on:true,  actions:[]},
+        "right.update":     {h3:"System Update", status:"—", on:false, actions:[]}
     })
 
     function detailKey() { return slot + "." + sub }
@@ -187,6 +197,58 @@ ShellRoot {
         if (key === "right.dnd") {
             return [{key:"toggle-dnd", label: dndEnabled ? "Disable DND" : "Enable DND"}]
         }
+        // ── Settings pages (backed by scripts/unit3-settings.py) ──
+        if (key === "right.display") {
+            var mons = sysMonitors()
+            if (mons.length === 0) return [{key:"none", label:"Reading screens…"}]
+            var actsD = [{key:"primary", label:"Primary: " + sys.display.primary + "  ▸"}]
+            if (mons.length > 1)
+                actsD.push({key:"side", label:"External on the " + sys.display.side + "  ▸"})
+            for (var mi = 0; mi < mons.length; mi++) {
+                var m = mons[mi]
+                actsD.push({key:"rate:" + m.name,
+                            label: m.name + " · " + m.width + "x" + m.height + " @ " + Math.round(m.rate) + " Hz  ▸"})
+            }
+            return actsD
+        }
+        if (key === "right.lock") {
+            var idle = sys.lock ? sys.lock.idle : 10
+            return [
+                {key:"idle",     label:"Lock when idle: " + (idle > 0 ? idle + " min" : "never") + "  ▸"},
+                {key:"sleep",    label:(sys.lock && sys.lock.sleep ? "[✓]" : "[ ]") + " Lock before suspend"},
+                {key:"lock-now", label:"→ Lock now"}
+            ]
+        }
+        if (key === "right.power") {
+            var actsP = []
+            var profs = (sys.live && sys.live.profiles) || []
+            for (var pi = 0; pi < profs.length; pi++)
+                actsP.push({key:"profile:" + profs[pi],
+                            label:(profs[pi] === sys.live.profile ? "✓ " : "  ") + profs[pi]})
+            if (sys.live && sys.live.brightness >= 0) {
+                actsP.push({key:"bright-up",   label:"▲ Brighter   (laptop " + sys.live.brightness + "%)"})
+                actsP.push({key:"bright-down", label:"▼ Dimmer"})
+            }
+            return actsP
+        }
+        if (key === "right.update") {
+            if (updChecking && !upd.repo) return [{key:"none", label:"Checking for updates…"}]
+            var pk = (upd.repo || []).concat(upd.aur || [])
+            var actsU = []
+            if (pk.length) actsU.push({key:"update-now", label:"→ Update now  (" + pk.length + ")"})
+            actsU.push({key:"recheck", label: updChecking ? "↻ Checking…" : "↻ Check again"})
+            for (var ui = 0; ui < pk.length; ui++)
+                actsU.push({key:"pkg:" + ui, label:"  " + pk[ui].name + " → " + pk[ui].to})
+            return actsU
+        }
+        if (key === "right.shell") {
+            var sh = sys.shell || {}
+            return [
+                {key:"player",     label:(sh.player     ? "[✓]" : "[ ]") + " Music player"},
+                {key:"playerBg",   label:(sh.playerBg   ? "[✓]" : "[ ]") + " Player background"},
+                {key:"companions", label:(sh.companions ? "[✓]" : "[ ]") + " Companions"}
+            ]
+        }
         // Autres : actions statiques du dictionnaire details
         var dd = root.details[key]
         return dd ? dd.actions : []
@@ -202,6 +264,11 @@ ShellRoot {
         if (key === "left.receive")      return "Receive Files"
         if (key === "right.history")     return "Notifications"
         if (key === "right.dnd")         return "Do Not Disturb"
+        if (key === "right.display")     return "Display"
+        if (key === "right.lock")        return "Lock & Idle"
+        if (key === "right.power")       return "Power"
+        if (key === "right.shell")       return "Shell"
+        if (key === "right.update")      return "System Update"
         var d = root.details[key]
         return d ? d.h3 : ""
     }
@@ -243,6 +310,26 @@ ShellRoot {
         if (key === "right.dnd") {
             return dndEnabled ? "Active" : "Off"
         }
+        if (key === "right.display") {
+            var ms = sysMonitors()
+            return ms.length + " screen" + (ms.length !== 1 ? "s" : "") + " · primary " + (sys.display ? sys.display.primary : "—")
+        }
+        if (key === "right.lock") {
+            var il = sys.lock ? sys.lock.idle : 0
+            return il > 0 ? "Locks after " + il + " min idle" : "Idle lock off"
+        }
+        if (key === "right.power") {
+            return sys.live ? (sys.live.profile + (sys.live.brightness >= 0 ? " · " + sys.live.brightness + "%" : "")) : "—"
+        }
+        if (key === "right.shell") {
+            return "Applies instantly"
+        }
+        if (key === "right.update") {
+            if (!upd.repo) return updChecking ? "Checking…" : "—"
+            var nr = upd.repo.length, na = upd.aur.length
+            if (nr + na === 0) return "Up to date"
+            return (nr + na) + " updates · " + nr + " repo, " + na + " AUR"
+        }
         var d2 = root.details[key]
         return d2 ? d2.status : ""
     }
@@ -256,9 +343,77 @@ ShellRoot {
         if (key === "left.receive")      return qshareUrl !== ""
         if (key === "right.history")     return notifications.length > 0
         if (key === "right.dnd")         return dndEnabled
+        if (key === "right.lock")        return sys.lock ? sys.lock.idle > 0 : false
+        if (key === "right.update")      return !!upd.repo && (upd.repo.length + upd.aur.length) > 0
         var d3 = root.details[key]
         return d3 ? d3.on : false
     }
+    // ── Settings (System card) ──
+    readonly property string settingsScript: xdgConfigHome + "/quickshell/scripts/unit3-settings.py"
+    readonly property var settingsSubs: ["display", "lock", "power", "shell"]
+    property var sys: ({})
+    function sysMonitors() { return (sys.live && sys.live.monitors) || [] }
+    function isSettingsSub() { return slot === "right" && settingsSubs.indexOf(sub) >= 0 }
+    Timer {
+        interval: 2000; running: root.open && root.isSettingsSub(); repeat: true; triggeredOnStart: true
+        onTriggered: if (!pollSys.running && !setSys.running) pollSys.running = true
+    }
+    Process {
+        id: pollSys
+        command: ["python3", root.settingsScript, "state"]
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try { root.sys = JSON.parse(this.text) } catch (e) { return }
+                // keep the highlight on a real item (the list can change after a reload)
+                if (root.isSettingsSub()) {
+                    var keys = root.actList().map(function(x){ return x.key })
+                    if (keys.indexOf(root.action) < 0) root.action = root.firstAction()
+                }
+            }
+        }
+    }
+    Process {
+        id: setSys
+        running: false
+        onExited: pollSys.running = true
+    }
+    // Saves one setting through the backend, then re-reads the state
+    function setSetting(key, value) {
+        setSys.command = ["python3", root.settingsScript, "set", key, String(value)]
+        setSys.running = true
+    }
+    // ── System update (scripts/unit3-update.sh) ──
+    readonly property string updateScript: xdgConfigHome + "/quickshell/scripts/unit3-update.sh"
+    property var  upd: ({})
+    property bool updChecking: false
+    function checkUpdates() {
+        if (updChecking) return
+        updChecking = true
+        pollUpd.running = true
+    }
+    Process {
+        id: pollUpd
+        command: [root.updateScript, "--check"]
+        running: false
+        onExited: root.updChecking = false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.updChecking = false
+                try { root.upd = JSON.parse(this.text) } catch (e) { return }
+                // land on "Update now" when there is something to install
+                if (root.slot === "right" && root.sub === "update") {
+                    var keys = root.actList().map(function(x){ return x.key })
+                    if (keys.indexOf(root.action) < 0 || root.action === "recheck") root.action = root.firstAction()
+                }
+            }
+        }
+    }
+    function cycle(list, current) {
+        var i = list.indexOf(current)
+        return list[(i + 1) % list.length]
+    }
+
     // ── Données système : Wi-Fi ──
     property bool   wifiEnabled: false
     property string wifiCurrentSSID: ""
@@ -734,9 +889,14 @@ ShellRoot {
         if (slot === "right")  {
             pollNotifsHistory.running = true
             pollNotifsDnd.running = true
+            pollSys.running = true
         }
     }
-    onSubChanged: cancelWifiPrompt()
+    onSubChanged: {
+        cancelWifiPrompt()
+        // check for updates once per visit to the Update page (it hits the network)
+        if (slot === "right" && sub === "update") checkUpdates()
+    }
     onLevelChanged: { if (level !== 3) cancelWifiPrompt() }
     onOpenChanged:  { if (!open) cancelWifiPrompt() }
 
@@ -926,6 +1086,48 @@ ShellRoot {
                 return
             }
         }
+        // ── System update ──
+        else if (slotKey === "right" && subKey === "update") {
+            if (actionKey === "update-now") {
+                root.close()
+                actProc.command = ["kitty", "--class", "unit3-update", "--title", "System update",
+                                   "-o", "initial_window_width=1100", "-o", "initial_window_height=700",
+                                   "-o", "remember_window_size=no", "-e", root.updateScript]
+                actProc.running = true
+            } else if (actionKey === "recheck") {
+                checkUpdates()
+            }
+            return
+        }
+        // ── Settings ──
+        else if (slotKey === "right" && root.settingsSubs.indexOf(subKey) >= 0) {
+            if (setSys.running) return
+            var mons = sysMonitors()
+            if (actionKey === "primary") {
+                setSetting("display.primary", cycle(mons.map(function(m){ return m.name }), sys.display.primary))
+            } else if (actionKey === "side") {
+                setSetting("display.side", sys.display.side === "right" ? "left" : "right")
+            } else if (actionKey.indexOf("rate:") === 0) {
+                var mon = mons.filter(function(m){ return m.name === actionKey.substring(5) })[0]
+                if (mon && mon.rates.length) setSetting("display.rate." + mon.name, cycle(mon.rates, mon.rate))
+            } else if (actionKey === "idle") {
+                setSetting("lock.idle", cycle([0, 5, 10, 15, 30], sys.lock.idle))
+            } else if (actionKey === "sleep") {
+                setSetting("lock.sleep", !sys.lock.sleep)
+            } else if (actionKey === "lock-now") {
+                root.close()
+                actProc.command = ["sh", "-c", "~/.config/quickshell/lock.sh --fast"]
+                actProc.running = true
+            } else if (actionKey.indexOf("profile:") === 0) {
+                setSetting("power.profile", actionKey.substring(8))
+            } else if (actionKey === "bright-up" || actionKey === "bright-down") {
+                var b = sys.live.brightness + (actionKey === "bright-up" ? 10 : -10)
+                setSetting("power.brightness", Math.min(100, Math.max(5, b)))
+            } else if (["player", "playerBg", "companions"].indexOf(actionKey) >= 0) {
+                setSetting("shell." + actionKey, !sys.shell[actionKey])
+            }
+            return
+        }
 
         if (cmd) {
             actProc.command = ["sh","-c", cmd]
@@ -1011,6 +1213,17 @@ ShellRoot {
         function toggle(): void { root.toggle() }
         function show(): void   { if (!root.open) root.toggle() }
         function hide(): void   { root.close() }
+        // Open a System page directly: display | lock | power | shell | history | dnd
+        function page(name: string): void {
+            if (!root.open) root.toggle()
+            root.slot = "right"; root.level = 3; root.sub = name; root.action = root.firstAction()
+        }
+        // Move the highlight within the open page: up | down | left | right; "enter" activates it
+        // Where the highlight is: "<card>.<page>.<item>"
+        function current(): string { return root.slot + "." + root.sub + "." + root.action }
+        function key(name: string): void {
+            if (name === "enter") root.activateCurrent(); else root.navigate(name)
+        }
     }
 
     // ── Navigation ──
@@ -1209,8 +1422,8 @@ ShellRoot {
                     }
                     Slot {
                         slotKey: "right"
-                        title: "Notifications"
-                        subtitle: "History · DND"
+                        title: "System"
+                        subtitle: "Notifs · Settings"
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.horizontalCenterOffset: (root.open && !root.closing) ? root.slotGapH : 0
@@ -1286,7 +1499,7 @@ ShellRoot {
                         // Header
                         Text {
                             text: "QSHARE"
-                            font.family: "Inter"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 11
                             font.letterSpacing: 5
                             font.weight: Font.Medium
@@ -1301,7 +1514,7 @@ ShellRoot {
                         Text {
                             width: parent.width
                             text: root.qshareLabel
-                            font.family: "Inter"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 12
                             font.weight: Font.Medium
                             color: root.colInk
@@ -1332,7 +1545,7 @@ ShellRoot {
                                     anchors.centerIn: parent
                                     visible: root.qshareQrPath === ""
                                     text: "GENERATING…"
-                                    font.family: "Inter"
+                                    font.family: "JetBrains Mono"
                                     font.pixelSize: 10
                                     font.letterSpacing: 3
                                     color: root.colCard
@@ -1345,7 +1558,7 @@ ShellRoot {
                         Text {
                             width: parent.width
                             text: root.qshareUrl
-                            font.family: "Iosevka, monospace"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 9
                             color: root.colInk
                             opacity: 0.55
@@ -1359,7 +1572,7 @@ ShellRoot {
                             text: root.qshareLastTick !== ""
                                   ? "✓ " + root.qshareLastTick
                                   : "Scan with phone…"
-                            font.family: "Inter"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 10
                             font.letterSpacing: 1.5
                             color: root.colInk
@@ -1382,7 +1595,7 @@ ShellRoot {
                         Text {
                             anchors.centerIn: parent
                             text: root.qshareKeepAlive ? "× STOP" : "× CANCEL"
-                            font.family: "Inter"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 10
                             font.letterSpacing: 2.5
                             font.weight: Font.Medium
@@ -1633,7 +1846,7 @@ ShellRoot {
                     z: 4
                     Text {
                         text: sl.title
-                        font.family: "Inter"
+                        font.family: "JetBrains Mono"
                         font.pixelSize: sl.isCenter ? 15 : 13
                         font.weight: Font.Medium
                         font.letterSpacing: sl.isCenter ? 6 : 0.3
@@ -1643,7 +1856,7 @@ ShellRoot {
                     }
                     Text {
                         text: sl.subtitle
-                        font.family: "Inter"
+                        font.family: "JetBrains Mono"
                         font.pixelSize: sl.isCenter ? 9 : 10
                         color: root.colInkSoft
                         font.letterSpacing: sl.isCenter ? 1 : 0.2
@@ -1758,7 +1971,7 @@ ShellRoot {
                     property string targetText: root.detailH3().toUpperCase()
                     text: targetText
                     onTargetTextChanged: scrambleH3.start()
-                    font.family: "Inter"
+                    font.family: "JetBrains Mono"
                     font.pixelSize: 11
                     font.letterSpacing: 5
                     font.weight: Font.Medium
@@ -1801,7 +2014,7 @@ ShellRoot {
                         property string targetText: root.detailStatus()
                         text: targetText
                         onTargetTextChanged: scrambleStatus.start()
-                        font.family: "Inter"
+                        font.family: "JetBrains Mono"
                         font.pixelSize: 12
                         color: root.colInk
                         anchors.verticalCenter: parent.verticalCenter
@@ -1839,7 +2052,7 @@ ShellRoot {
                         anchors.centerIn: parent
                         visible: actListContainer.isNotifList && actListContainer.actCount === 0
                         text: "No notifications"
-                        font.family: "Inter"
+                        font.family: "JetBrains Mono"
                         font.pixelSize: 11
                         color: root.colInkSoft
                         font.letterSpacing: 1
@@ -1939,7 +2152,7 @@ ShellRoot {
                         Text {
                             anchors.centerIn: parent
                             text: "× CLEAR ALL"
-                            font.family: "Inter"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 11
                             font.letterSpacing: 2.5
                             font.weight: Font.Medium
@@ -2068,7 +2281,7 @@ ShellRoot {
                         // Indication mute clickable
                         Text {
                             text: root.audioMuted ? "Muted · Click track to unmute" : "Right-click track to mute · Scroll to adjust"
-                            font.family: "Inter"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 9
                             color: root.colInk
                             opacity: 0.5
@@ -2094,7 +2307,7 @@ ShellRoot {
 
                         Text {
                             text: "PASSWORD · " + root.wifiPromptSSID
-                            font.family: "Inter"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 10
                             font.letterSpacing: 3
                             font.weight: Font.Medium
@@ -2116,7 +2329,7 @@ ShellRoot {
                                 anchors.rightMargin: 10
                                 verticalAlignment: TextInput.AlignVCenter
                                 color: root.colInk
-                                font.family: "Inter"
+                                font.family: "JetBrains Mono"
                                 font.pixelSize: 13
                                 echoMode: TextInput.Password
                                 clip: true
@@ -2160,7 +2373,7 @@ ShellRoot {
                         Text {
                             visible: root.wifiError !== ""
                             text: root.wifiError
-                            font.family: "Inter"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 10
                             color: "#a04030"
                         }
@@ -2174,7 +2387,7 @@ ShellRoot {
                                 Text {
                                     anchors.centerIn: parent
                                     text: "CONNECT"
-                                    font.family: "Inter"
+                                    font.family: "JetBrains Mono"
                                     font.pixelSize: 10
                                     font.letterSpacing: 2
                                     font.weight: Font.Medium
@@ -2193,7 +2406,7 @@ ShellRoot {
                                 Text {
                                     anchors.centerIn: parent
                                     text: "CANCEL"
-                                    font.family: "Inter"
+                                    font.family: "JetBrains Mono"
                                     font.pixelSize: 10
                                     font.letterSpacing: 2
                                     font.weight: Font.Medium
@@ -2297,7 +2510,7 @@ ShellRoot {
             text: targetText
             onTargetTextChanged: subScramble.start()
             anchors.centerIn: parent
-            font.family: "Inter"
+            font.family: "JetBrains Mono"
             font.pixelSize: 13
             font.weight: Font.Medium
             color: root.colInk
@@ -2398,7 +2611,7 @@ ShellRoot {
             anchors.left: parent.left
             anchors.leftMargin: 22
             anchors.verticalCenter: parent.verticalCenter
-            font.family: "Inter"
+            font.family: "JetBrains Mono"
             font.pixelSize: 11
             font.weight: Font.Medium
             font.letterSpacing: 2.5
@@ -2500,7 +2713,7 @@ ShellRoot {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 text: nbtn.notifData.app ? nbtn.notifData.app.toUpperCase() : ""
-                font.family: "Inter"
+                font.family: "JetBrains Mono"
                 font.pixelSize: 8
                 font.letterSpacing: 1.5
                 color: nbtn.isFocus ? root.colCard : root.colInk
@@ -2516,7 +2729,7 @@ ShellRoot {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 text: nbtn.notifData.label
-                font.family: "Inter"
+                font.family: "JetBrains Mono"
                 font.pixelSize: 11
                 font.weight: Font.Medium
                 color: nbtn.isFocus ? root.colCard : root.colInk
@@ -2533,7 +2746,7 @@ ShellRoot {
                 anchors.right: parent.right
                 visible: nbtn.expanded && text !== ""
                 text: nbtn.notifData.body
-                font.family: "Inter"
+                font.family: "JetBrains Mono"
                 font.pixelSize: 10
                 color: nbtn.isFocus ? root.colCard : root.colInk
                 opacity: 0.85
@@ -2561,7 +2774,7 @@ ShellRoot {
                     }
                     return bits.join(" · ")
                 }
-                font.family: "Inter"
+                font.family: "JetBrains Mono"
                 font.pixelSize: 8
                 font.letterSpacing: 1
                 color: nbtn.isFocus ? root.colCard : root.colInk
@@ -2581,7 +2794,7 @@ ShellRoot {
             Text {
                 anchors.centerIn: parent
                 text: nbtn.expanded ? "▾" : "▸"
-                font.family: "Inter"
+                font.family: "JetBrains Mono"
                 font.pixelSize: 12
                 color: nbtn.isFocus ? root.colCard : root.colInk
                 opacity: 0.8

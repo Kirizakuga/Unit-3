@@ -10,6 +10,15 @@ ShellRoot {
     // ── Fast mode (skip reveal animation, used for lid-switch lock) ──
     property bool fastMode: Quickshell.env("UNIT3_LOCK_FAST") === "1"
 
+    // ── Text with a cream backing, for readability over the grid ──
+    component Tag: Text { font.family: "JetBrains Mono";
+        Rectangle {
+            z: -1; color: "#d6cfb5"; opacity: 0.92
+            x: parent.horizontalAlignment === Text.AlignRight ? parent.width - parent.contentWidth - 5 : -5
+            y: -2; width: parent.contentWidth + 10; height: parent.height + 4
+        }
+    }
+
     // ── État partagé ──
     property bool   revealing: false   // vidéo reveal en cours
     property bool   frozen:    false   // reveal freezée sur dernière frame
@@ -26,6 +35,11 @@ ShellRoot {
     property bool   lockPending: false
 
     property string currentUser: "user"
+    property string kernel: ""
+    Process {
+        command:["uname","-r"]; running:true
+        stdout: SplitParser { onRead: data => root.kernel = data.trim() }
+    }
     Process {
         id: getUserProc; command:["sh","-c","echo $USER"]; running:true
         stdout: SplitParser { onRead: data => { var u=data.trim(); if(u!=="") root.currentUser=u } }
@@ -85,13 +99,18 @@ ShellRoot {
             screen: modelData
             anchors.top:true;anchors.left:true;anchors.right:true;anchors.bottom:true
             exclusionMode: ExclusionMode.Ignore
-            color: "black"
+            // Transparent so the unlock wipe reveals the desktop; the black backdrop below covers it while locked
+            color: "transparent"
             implicitWidth: modelData.width; implicitHeight: modelData.height
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: (root.frozen && !root.hiding && !root.done)
                 ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
             property bool isPrimary: modelData.name === Quickshell.screens[0].name
+            // The lock background stays up until the unlock video has its first frame (no flash)
+            property bool hideStarted: root.hiding && hide.position > 0
+
+            Rectangle { anchors.fill: parent; color: "black"; z: -1; visible: !root.hiding && !root.done }
 
             // ── Fast mode background ──
             // Affiche la dernière frame de wave_reveal.mp4 comme image statique.
@@ -100,7 +119,7 @@ ShellRoot {
                 id: fastBg
                 anchors.fill: parent
                 source: root.fastMode ? ("file://" + root.xdgConfigHome + "/quickshell/videos/wave_last_frame.png") : ""
-                visible: root.fastMode && !root.hiding && !root.done
+                visible: root.fastMode && !hideStarted && !root.done
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: false
                 cache: true
@@ -128,7 +147,7 @@ ShellRoot {
             VideoOutput {
                 id: voReveal
                 anchors.fill: parent
-                visible: !root.fastMode && !root.done
+                visible: !root.fastMode && !hideStarted && !root.done
             }
 
             // ── Hide ──
@@ -149,6 +168,12 @@ ShellRoot {
                 z: 1
                 visible: root.hiding || root.done
                 opacity: 1.0
+                // Key out the black of the wave so it uncovers the desktop instead of going black
+                layer.enabled: true
+                layer.effect: ShaderEffect {
+                    property variant source
+                    fragmentShader: Qt.resolvedUrl("lumakey.frag.qsb")
+                }
             }
 
             // Fade + fermeture 1s avant la fin de hide
@@ -176,10 +201,15 @@ ShellRoot {
                 visible: !root.done
                 z: 2
 
-                property real uiOp: (root.frozen || root.revealing) ? 1 : 0
+                property real uiOp: ((root.frozen || root.revealing) ? 1 : 0) * hideOp
                 Behavior on uiOp {
-                    enabled: !root.fastMode
+                    enabled: !root.fastMode && !root.hiding
                     NumberAnimation { duration: 400 }
+                }
+                // Corners and ticker (text + cream backing) fade out as the unlock wave starts
+                property real hideOp: 1
+                NumberAnimation on hideOp {
+                    running: root.hiding; to: 0; duration: 450; easing.type: Easing.OutQuad
                 }
 
                 // Coins
@@ -193,33 +223,33 @@ ShellRoot {
                                 SequentialAnimation on opacity { running:root.frozen; loops:Animation.Infinite
                                     NumberAnimation{to:0.3;duration:900} NumberAnimation{to:1;duration:900} }
                             }
-                            Text{text:"SESSION LOCKED";font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                            Tag{text:"SESSION LOCKED";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
                         }
-                        Text{text:"NODE · "+root.currentUser+"@arch";font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
-                        Text{text:"セッションロック中";font.family:"Noto Sans JP";font.pixelSize:8;color:"#463f2e";opacity:0.7}
+                        Tag{text:"NODE · "+root.currentUser+"@arch";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                        Tag{text:"セッションロック中";font.family: "JetBrains Mono";font.pixelSize:8;color:"#463f2e";opacity:0.7}
                     }
                 }
                 Item {
                     anchors { top:parent.top; right:parent.right; topMargin:28; rightMargin:30 }
                     z:5; opacity:parent.uiOp
-                    Column { spacing:2
-                        Text{text:root.clockFull;font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:200;horizontalAlignment:Text.AlignRight}
-                        Text{text:"LONGVIC · FR";font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:200;horizontalAlignment:Text.AlignRight}
+                    Column { spacing:2; anchors.right:parent.right
+                        Tag{text:root.clockFull;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:200;horizontalAlignment:Text.AlignRight}
+                        Tag{text:root.dateStr;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:200;horizontalAlignment:Text.AlignRight}
                     }
                 }
                 Item {
                     anchors { bottom:parent.bottom; left:parent.left; bottomMargin:28; leftMargin:30 }
                     z:5; opacity:parent.uiOp
-                    Column { spacing:2
-                        Text{text:"KERNEL 6.13.2";font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
-                        Text{text:"WM · hyprland";font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                    Column { spacing:2; anchors.bottom:parent.bottom
+                        Tag{text:"KERNEL "+root.kernel;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                        Tag{text:"WM · hyprland";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
                     }
                 }
                 Item {
                     anchors { bottom:parent.bottom; right:parent.right; bottomMargin:28; rightMargin:30 }
                     z:5; opacity:parent.uiOp
-                    Column { spacing:2
-                        Text{text:"ARCH LINUX · RX 6700 XT";font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:220;horizontalAlignment:Text.AlignRight}
+                    Column { spacing:2; anchors.bottom:parent.bottom; anchors.right:parent.right
+                        Tag{text:"CACHYOS · RTX 4050";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:220;horizontalAlignment:Text.AlignRight}
                     }
                 }
 
@@ -227,10 +257,11 @@ ShellRoot {
                 Item {
                     anchors{bottom:parent.bottom;bottomMargin:65;left:parent.left;right:parent.right}
                     height:18;z:5;opacity:parent.uiOp;clip:true
+                    Rectangle{anchors.fill:parent;color:"#d6cfb5";opacity:0.92}
                     Text {
                         id:tickTxt
                         text:"SYSTEM SCAN · OK ▸ MEMORY INTEGRITY · VERIFIED ▸ SESSION LOCKED · SECURE ▸ NETWORK UPLINK · STABLE ▸ THERMAL · NOMINAL ▸ AUTH DAEMON · LISTENING ▸ "
-                        font.family:"Share Tech Mono";font.pixelSize:8;font.letterSpacing:3;color:"#463f2e";y:2
+                        font.family: "JetBrains Mono";font.pixelSize:8;font.letterSpacing:3;color:"#463f2e";y:2
                         NumberAnimation on x { from:modelData.width; to:-tickTxt.implicitWidth; duration:55000; loops:Animation.Infinite; running:root.frozen }
                     }
                 }
@@ -318,17 +349,17 @@ ShellRoot {
                                     anchors.horizontalCenter:parent.horizontalCenter
                                     Rectangle{width:52;height:52;color:"#463f2e";anchors.centerIn:parent
                                         transform:Rotation{angle:45;origin.x:26;origin.y:26}}
-                                    Text{text:"NR";font.family:"Share Tech Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.top:parent.top;anchors.left:parent.left;anchors.margins:3}
-                                    Text{text:"2B";font.family:"Share Tech Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.bottom:parent.bottom;anchors.right:parent.right;anchors.margins:3}
+                                    Text{text:"NR";font.family: "JetBrains Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.top:parent.top;anchors.left:parent.left;anchors.margins:3}
+                                    Text{text:"2B";font.family: "JetBrains Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.bottom:parent.bottom;anchors.right:parent.right;anchors.margins:3}
                                 }
                             }
-                            Text{text:root.currentUser.toUpperCase();font.family:"Share Tech Mono";font.pixelSize:13;font.letterSpacing:3;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{text:root.currentUser.toUpperCase();font.family: "JetBrains Mono";font.pixelSize:13;font.letterSpacing:3;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:4}
-                            Text{text:"ユニット · アクティブ";font.family:"Noto Sans JP";font.pixelSize:8;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{text:"ユニット · アクティブ";font.family: "JetBrains Mono";font.pixelSize:8;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:20}
-                            Text{text:root.clockStr;font.family:"Share Tech Mono";font.pixelSize:46;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{text:root.clockStr;font.family: "JetBrains Mono";font.pixelSize:46;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:6}
-                            Text{text:root.dateStr;font.family:"Share Tech Mono";font.pixelSize:9;font.letterSpacing:3;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{text:root.dateStr;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:3;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:20}
                             Rectangle{width:parent.width;height:1;color:Qt.rgba(70/255,63/255,46/255,0.22)}
                             Item{width:1;height:22}
@@ -337,7 +368,7 @@ ShellRoot {
                                 Rectangle{anchors.fill:parent;color:"transparent"
                                     border.color:inputScope.activeFocus?"#463f2e":Qt.rgba(70/255,63/255,46/255,0.22);border.width:1
                                     Behavior on border.color{ColorAnimation{duration:200}}}
-                                Text{anchors.left:parent.left;anchors.leftMargin:10;anchors.verticalCenter:parent.verticalCenter;text:"▸";font.pixelSize:10;color:"#6e2a2a"}
+                                Text{ font.family: "JetBrains Mono";anchors.left:parent.left;anchors.leftMargin:10;anchors.verticalCenter:parent.verticalCenter;text:"▸";font.pixelSize:10;color:"#6e2a2a"}
                                 FocusScope {
                                     id:inputScope
                                     anchors{fill:parent;leftMargin:26;rightMargin:10}
@@ -345,7 +376,7 @@ ShellRoot {
                                     TextInput {
                                         id:pwInput;anchors.fill:parent
                                         verticalAlignment:TextInput.AlignVCenter
-                                        font.family:"Share Tech Mono";font.pixelSize:12;font.letterSpacing:2
+                                        font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2
                                         color:"#463f2e";echoMode:TextInput.Password;passwordCharacter:"·"
                                         focus:true;readOnly:false
                                         text:root.lockInput
@@ -353,7 +384,7 @@ ShellRoot {
                                         Keys.onReturnPressed: { root.doAuth() }
                                         Keys.onEscapePressed: { root.lockInput="" }
                                         Text{visible:parent.text==="";anchors.verticalCenter:parent.verticalCenter
-                                            text:"mot de passe...";font.family:"Share Tech Mono";font.pixelSize:11;font.italic:true;color:"#7a7358";opacity:0.5}
+                                            text:"mot de passe...";font.family: "JetBrains Mono";font.pixelSize:11;font.italic:true;color:"#7a7358";opacity:0.5}
                                     }
                                 }
                             }
@@ -364,7 +395,7 @@ ShellRoot {
                                     Rectangle{visible:index<root.lockInput.length;anchors.fill:parent;color:"#463f2e"}}}}
                             Item{width:1;height:6}
 
-                            Text{text:"AUTHENTIFICATION ÉCHOUÉE";font.family:"Share Tech Mono";font.pixelSize:8;font.letterSpacing:2;color:"#6e2a2a"
+                            Text{text:"AUTHENTIFICATION ÉCHOUÉE";font.family: "JetBrains Mono";font.pixelSize:8;font.letterSpacing:2;color:"#6e2a2a"
                                 anchors.horizontalCenter:parent.horizontalCenter
                                 opacity:root.lockError?1:0;height:14;Behavior on opacity{NumberAnimation{duration:200}}}
                             Item{width:1;height:10}
@@ -373,7 +404,7 @@ ShellRoot {
                                 Rectangle{anchors.fill:parent;color:"transparent";border.color:"#463f2e";border.width:1}
                                 Rectangle{id:unlockFill;anchors.left:parent.left;anchors.top:parent.top;anchors.bottom:parent.bottom;color:"#463f2e";width:0
                                     Behavior on width{NumberAnimation{duration:280;easing.type:Easing.InOutQuart}}}
-                                Text{anchors.centerIn:parent;text:"Login";font.family:"Share Tech Mono";font.pixelSize:10;font.letterSpacing:3
+                                Text{anchors.centerIn:parent;text:"Login";font.family: "JetBrains Mono";font.pixelSize:10;font.letterSpacing:3
                                     color:unlockMA.containsMouse?"#d6cfb5":"#463f2e";Behavior on color{ColorAnimation{duration:200}}}
                                 MouseArea{id:unlockMA;anchors.fill:parent;hoverEnabled:true
                                     onEntered:unlockFill.width=parent.width;onExited:unlockFill.width=0
@@ -386,12 +417,6 @@ ShellRoot {
                 Timer{id:focusRetry;interval:50;repeat:true;property int cnt:0
                     onTriggered:{pwInput.forceActiveFocus();if(++cnt>=8){running=false;cnt=0}}}
 
-                Rectangle {
-                    anchors.fill: parent
-                    color: "black"
-                    z: 10
-                    visible: root.done
-                }
 
                 Timer {
                     id: exitTimer; interval: 50; repeat: false
@@ -459,7 +484,7 @@ ShellRoot {
     property string dateStr:   "---- / -- / --"
     property string clockFull: "--:--:--"
     Timer {
-        interval:1000;running:true;repeat:true
+        interval:1000;running:true;repeat:true;triggeredOnStart:true
         onTriggered:{
             var d=new Date(),p=function(x){return String(x).padStart(2,"0")}
             root.clockStr  = p(d.getHours())+":"+p(d.getMinutes())

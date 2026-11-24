@@ -31,3 +31,10 @@ Thumbs.db
 # ─── Local dev junk ────────────────────────────────────
 *.local.sh
 TODO.local.md
+
+# ─── Per-user files written at runtime (Unit-3 Control Center) ─────
+hypr/user.lua
+**/user.lua
+quickshell/settings/user.json
+**/settings/user.json
+**/videos/

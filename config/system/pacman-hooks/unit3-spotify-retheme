@@ -1,0 +1,21 @@
+#!/bin/bash
+# Run by /etc/pacman.d/hooks/zz-unit3-spotify.hook (as root) after Spotify installs or updates.
+# Re-applies Spicetify for every user who has a Spicetify config.
+# Never fails the pacman transaction: problems are only reported.
+APPS=/opt/spotify/Apps
+
+chmod a+wr /opt/spotify && chmod -R a+wr "$APPS"
+# pacman installs fresh .spa files; the extracted folders next to them are Spicetify's stale copies
+for app in xpui login; do
+    [[ -f "$APPS/$app.spa" && -d "$APPS/$app" ]] && rm -rf "${APPS:?}/$app"
+done
+for cfg in /home/*/.config/spicetify/config-xpui.ini; do
+    [[ -f "$cfg" ]] || continue
+    user=$(stat -c %U "$cfg"); home=$(getent passwd "$user" | cut -d: -f6)
+    if runuser -u "$user" -- env HOME="$home" /usr/bin/spicetify backup apply -n >/dev/null 2>&1; then
+        echo "  Spotify theme re-applied for $user."
+    else
+        echo "  Could not re-apply the Spotify theme; run as $user: spicetify backup apply"
+    fi
+done
+exit 0

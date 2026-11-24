@@ -1,13 +1,32 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  SETTINGS — options de configuration du rice NieR           ║
 // ║  Modifie les valeurs ici pour personnaliser le comportement  ║
 // ╚══════════════════════════════════════════════════════════════╝
 
-QtObject {
+Singleton {
+
+    // ── Live options from the Control Center (System > Shell) ──
+    // Saved in user.json by scripts/unit3-settings.py; changes apply without a restart.
+    FileView {
+        path: Quickshell.env("HOME") + "/.config/quickshell/settings/user.json"
+        watchChanges: true
+        blockLoading: true
+        onFileChanged: reload()
+        JsonAdapter {
+            id: user
+            property JsonObject shell: JsonObject {
+                property bool player: true
+                property bool playerBg: true
+                property bool companions: false
+            }
+        }
+    }
+    readonly property bool playerEnabled: user.shell.player
 
     // ── SCALE GLOBAL ────────────────────────────────────────────
 
@@ -33,7 +52,7 @@ QtObject {
     // ── PLAYER ──────────────────────────────────────────────────
 
     // Fond du player : true = fond sombre opaque / false = transparent
-    readonly property bool playerBackground: true
+    readonly property bool playerBackground: user.shell.playerBg
 
     // Couleur du fond (utilisée seulement si playerBackground = true)
     readonly property color playerBgColor: Qt.rgba(11/255, 10/255, 9/255, 0.92)
@@ -50,7 +69,7 @@ QtObject {
 
     // ── COMPANIONS ──────────────────────────────────────────────
 
-    readonly property bool companionsEnabled: true  // Afficher les compagnons
+    readonly property bool companionsEnabled: user.shell.companions  // Afficher les compagnons
 
     // Distance du bord droit en pixels
     readonly property int companionsMarginRight: s(20)

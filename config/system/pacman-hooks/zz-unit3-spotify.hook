@@ -1,0 +1,11 @@
+# Unit-3: re-apply the Spicetify theme after every Spotify update.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = spotify
+
+[Action]
+Description = Unit-3: re-theming Spotify...
+When = PostTransaction
+Exec = /usr/local/bin/unit3-spotify-retheme

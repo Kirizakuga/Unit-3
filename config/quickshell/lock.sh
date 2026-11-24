@@ -9,8 +9,8 @@ pgrep -f "lockscreen.qml" >/dev/null && exit 0
 
 # Pass fast mode to Quickshell via environment variable
 if [[ "$1" == "--fast" ]]; then
-   UNIT3_LOCK_FAST=1 QT_MEDIA_BACKEND=ffmpeg qs -p ~/.config/quickshell/widgets/lockscreen.qml
+   UNIT3_LOCK_FAST=1 QT_MEDIA_BACKEND=ffmpeg qs -p ~/.config/quickshell/lock/lockscreen.qml
    else
-    QT_MEDIA_BACKEND=ffmpeg qs -p ~/.config/quickshell/widgets/lockscreen.qml
+    QT_MEDIA_BACKEND=ffmpeg qs -p ~/.config/quickshell/lock/lockscreen.qml
 fi
 

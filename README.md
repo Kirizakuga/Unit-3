@@ -1,5 +1,45 @@
-> [!WARNING]
-> **Hyprland v0.55+ Lua migration** — This config uses legacy hyprlang syntax (supported until ~v0.57). Pin to v0.54 or wait for the Lua port. 
+> [!NOTE]
+> **This is a fork of [samyns/Unit-3](https://github.com/samyns/Unit-3)** ported to **Hyprland 0.57 (Lua config)**,
+> with a settings page, Alt+Tab switcher, safe updater and matching app themes. All credit for the original rice goes to samyns.
+
+## What this fork adds
+
+- **Hyprland 0.57 Lua config:** `hypr/hyprland.lua` (converted from `hyprland.conf`), plus `unit3.lua` for the additions below.
+  Personal overrides go in `hypr/user.lua`, which the installer creates empty and never overwrites.
+- **Control Center → System card** (`SUPER+Tab`, then →):
+  - **Display:** primary screen, external screen side, refresh rate per screen (writes `hypr/monitors.lua`)
+  - **Lock & Idle:** lock after 5–30 min idle or never, lock before suspend, lock now (writes `hypr/hypridle.conf`)
+  - **Power:** power profile, laptop brightness
+  - **Shell:** music player, player background, companions (applies instantly)
+  - **Update:** pending repo/AUR updates and a guarded updater: Arch news check, snapper snapshot first,
+    repo then AUR, re-applies theme tweaks, lists `.pacnew` files, says when to reboot
+  - Open a page directly: `qs ipc call ctrl page display`
+- **Alt+Tab switcher** with live window previews: hold Alt, Tab / Shift+Tab to move, release to switch;
+  W / Q / Delete or × closes a window without leaving the switcher.
+- **Lockscreen:** opens in ~0.7 s (moved out of the `widgets` module), readable cream labels, unlock wipe reveals the desktop,
+  no second lock right after login.
+- **SDDM login theme `unit3`** matching the lockscreen (`config/sddm/`), plus an example Xsetup for monitor layout.
+- **App themes in the same palette and JetBrains Mono:** GTK3/4 (`adw-gtk3` + `gtk.css`), Qt/KDE (`Unit3.colors`),
+  kitty, Spotify (Spicetify theme `unit3`).
+- **Survives updates:** pacman hooks re-apply sand Papirus folders and the Spotify theme after every update;
+  `scripts/unit3-keep.sh` saves/checks/restores every customization.
+- **Fixes:** `ctrl.sh` no longer kills `cloudflared`; `ext_last_fr.py` no longer writes to a hard-coded home folder.
+
+### Extra setup (not done by the installer)
+
+```bash
+sudo pacman -S --needed adw-gtk-theme papirus-icon-theme papirus-folders ttf-jetbrains-mono nodejs hypridle
+sudo papirus-folders -C paleorange --theme Papirus-Dark
+cp -r config/gtk-3.0 config/gtk-4.0 config/fontconfig ~/.config/
+mkdir -p ~/.local/share/color-schemes && cp config/color-schemes/Unit3.colors ~/.local/share/color-schemes/
+# Qt apps: set ColorScheme=Unit3 in ~/.config/kdeglobals (QT_QPA_PLATFORMTHEME=kde is set in unit3.lua)
+cp -r config/spicetify/Themes/unit3 ~/.config/spicetify/Themes/ && spicetify config current_theme unit3 color_scheme unit3 && spicetify apply
+sudo cp -r config/sddm/unit3 /usr/share/sddm/themes/ && sudo cp config/sddm/10-unit3.conf /etc/sddm.conf.d/
+sudo cp config/system/pacman-hooks/*.hook /etc/pacman.d/hooks/ && sudo install -m755 config/system/pacman-hooks/unit3-spotify-retheme /usr/local/bin/
+```
+
+---
+
 
 # Unit-3
 

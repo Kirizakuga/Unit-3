@@ -485,7 +485,7 @@ Scope {
                     Text {
                         text: notif.urgencyJp
                         color: "#7a7358"
-                        font.family: "Noto Sans JP"
+                        font.family: "JetBrains Mono"
                         font.pixelSize: 9
                     }
 
@@ -654,7 +654,7 @@ Scope {
                             Layout.fillWidth: true
                             text: notif.notification ? notif.notification.summary : ""
                             color: "#2e2a1f"
-                            font.family: "Inter"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 13
                             font.weight: Font.Medium
                             font.letterSpacing: 0.8
@@ -668,7 +668,7 @@ Scope {
                             Layout.fillWidth: true
                             text: notif.notification ? notif.notification.body : ""
                             color: "#463f2e"
-                            font.family: "Inter"
+                            font.family: "JetBrains Mono"
                             font.pixelSize: 11
                             font.weight: Font.Light
                             font.letterSpacing: 0.3

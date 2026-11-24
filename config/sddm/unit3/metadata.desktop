@@ -1,0 +1,12 @@
+[SddmGreeterTheme]
+Name=Unit-3
+Description=SDDM login screen styled after the Unit-3 Quickshell lockscreen
+Author=local
+License=MIT
+Type=greeter
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=unit3
+Theme-API=2.0
+QtVersion=6

@@ -72,7 +72,7 @@ Item {
         id:             label_text
         anchors.centerIn: parent
         text:           root.label
-        font.family:    "Share Tech Mono"
+        font.family: "JetBrains Mono"
         font.pixelSize: root.fontSize
         font.letterSpacing: root.letterSpacing
         color: ma.containsMouse ? root.fgHover : root.fgColor
