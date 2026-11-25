@@ -16,6 +16,8 @@
   - Open a page directly: `qs ipc call ctrl page display`
 - **Alt+Tab switcher** with live window previews: hold Alt, Tab / Shift+Tab to move, release to switch;
   W / Q / Delete or × closes a window without leaving the switcher.
+- **Minimize:** `SUPER+N` hides the focused window; it shows up in Alt+Tab tagged MIN, and picking it brings it back.
+- **Fix:** `SUPER+M` (Spotify scratchpad) works again on Hyprland 0.57.
 - **Lockscreen:** opens in ~0.7 s (moved out of the `widgets` module), readable cream labels, unlock wipe reveals the desktop,
   no second lock right after login.
 - **SDDM login theme `unit3`** matching the lockscreen (`config/sddm/`), plus an example Xsetup for monitor layout.

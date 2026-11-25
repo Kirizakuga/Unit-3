@@ -60,3 +60,20 @@ hl.unbind("ALT + Tab")
 hl.unbind("ALT + SHIFT + Tab")
 hl.bind("ALT + Tab", function() hl.exec_cmd("qs ipc call alttab next"); watch_alt() end)
 hl.bind("ALT + SHIFT + Tab", function() hl.exec_cmd("qs ipc call alttab prev"); watch_alt() end)
+
+-- Minimize: SUPER+N sends the focused window to a hidden workspace without leaving yours.
+-- Alt+Tab lists minimized windows (tagged MIN); picking one brings it back to your workspace.
+hl.bind("SUPER + N", hl.dsp.window.move({ workspace = "special:minimized", follow = false }))
+
+-- Spotify: SUPER+M shows/hides its scratchpad, or starts it if it isn't running.
+-- (hyprland.lua's version used the pre-0.57 "hyprctl dispatch togglespecialworkspace" syntax.)
+hl.unbind("SUPER + M")
+hl.bind("SUPER + M", function()
+    for _, w in ipairs(hl.get_windows()) do
+        if w.class == "Spotify" or w.class == "spotify" then
+            hl.dispatch(hl.dsp.workspace.toggle_special("spotify"))
+            return
+        end
+    end
+    hl.exec_cmd("spotify")
+end)

@@ -36,6 +36,7 @@ Scope {
     property var    wins: []                 // [{address, title, cls, ws, toplevel}]
     property int    sel: 0
     property string monitorName: ""
+    property int    currentWs: 1                 // where restored (minimized) windows go
     // hover only selects after the mouse really moves (a resting cursor must not steal the selection)
     property bool   hoverArmed: false
     onOpenChanged: { hoverArmed = false; if (open) armTimer.restart() }
@@ -69,13 +70,16 @@ Scope {
         try { clients = JSON.parse(parts[0]); monitors = JSON.parse(parts[1]) } catch (e) { return }
         var focusedMon = monitors.filter(function(m){ return m.focused })[0]
         monitorName = focusedMon ? focusedMon.name : (monitors[0] ? monitors[0].name : "")
+        currentWs = focusedMon ? focusedMon.activeWorkspace.id : 1
 
-        // normal workspaces only (special ones like the Spotify scratchpad are left out)
-        var list = clients.filter(function(c){ return c.mapped && !c.hidden && c.workspace.id > 0 })
+        // normal workspaces plus minimized windows (other special ones, like the Spotify scratchpad, are left out)
+        var list = clients.filter(function(c){
+            return c.mapped && !c.hidden && (c.workspace.id > 0 || c.workspace.name === "special:minimized")
+        })
         list.sort(function(a, b){ return a.focusHistoryID - b.focusHistoryID })
         wins = list.map(function(c){
             return { address: c.address, title: c.title || c.class, cls: c.class || "",
-                     ws: c.workspace.name }
+                     ws: c.workspace.name, minimized: c.workspace.name === "special:minimized" }
         })
         if (wins.length === 0) { commitWhenReady = false; return }
 
@@ -89,8 +93,13 @@ Scope {
     function focusSelected() {
         var w = wins[sel]
         if (!w) return
-        focusProc.command = ["hyprctl", "dispatch",
-                             'hl.dsp.focus({window = "address:' + w.address + '"})']
+        var focus = "hyprctl dispatch 'hl.dsp.focus({window = \"address:" + w.address + "\"})'"
+        // a minimized window comes back to the workspace you're on first
+        var restore = w.minimized
+            ? "hyprctl dispatch 'hl.dsp.window.move({window = \"address:" + w.address
+              + "\", workspace = \"" + currentWs + "\"})' && "
+            : ""
+        focusProc.command = ["sh", "-c", restore + focus]
         focusProc.running = true
     }
     function start(dir) {
@@ -312,7 +321,7 @@ Scope {
                                 Text {
                                     id: wsTag
                                     anchors { right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter }
-                                    text: "WS " + card.modelData.ws
+                                    text: card.modelData.minimized ? "MIN" : "WS " + card.modelData.ws
                                     font.family: root.fontName; font.pixelSize: 9; font.letterSpacing: 1.5
                                     color: card.isSel ? root.colDark : root.colInk
                                 }
