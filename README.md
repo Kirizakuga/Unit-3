@@ -36,6 +36,7 @@ mkdir -p ~/.local/share/color-schemes && cp config/color-schemes/Unit3.colors ~/
 cp -r config/spicetify/Themes/unit3 ~/.config/spicetify/Themes/ && spicetify config current_theme unit3 color_scheme unit3 && spicetify apply
 sudo cp -r config/sddm/unit3 /usr/share/sddm/themes/ && sudo cp config/sddm/10-unit3.conf /etc/sddm.conf.d/
 sudo cp config/system/pacman-hooks/*.hook /etc/pacman.d/hooks/ && sudo install -m755 config/system/pacman-hooks/unit3-spotify-retheme /usr/local/bin/
+cp config/Xresources ~/.Xresources   # X11 apps (Steam, Proton) get the same font smoothing and cursor
 ```
 
 ---

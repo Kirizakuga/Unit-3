@@ -21,6 +21,7 @@ HOME_PATHS=(
     .config/hypr
     .config/quickshell
     .config/kitty/kitty.conf
+    .Xresources
     .config/kdeglobals
     .config/gtk-3.0/gtk.css
     .config/gtk-3.0/settings.ini

@@ -12,6 +12,8 @@ hl.env("QS_ICON_THEME", "Papirus-Dark")
 -- Idle lock (timeout is set in Control Center > System > Lock & Idle, written to hypridle.conf)
 hl.on("hyprland.start", function()
     hl.exec_cmd("hypridle")
+    -- X11 apps (Steam, Proton games): same font smoothing and cursor as Wayland apps
+    hl.exec_cmd("xrdb -merge ~/.Xresources")
 end)
 
 -- Reliable app-menu shortcut (in addition to tapping SUPER)

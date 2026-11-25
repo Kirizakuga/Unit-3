@@ -1,0 +1,11 @@
+! Unit-3: make X11 (XWayland) apps render text and the cursor like the Wayland apps.
+! Matches ~/.config/fontconfig/fonts.conf (antialias on, slight hinting, no subpixel).
+Xft.antialias: 1
+Xft.hinting:   1
+Xft.hintstyle: hintslight
+Xft.rgba:      none
+Xft.lcdfilter: lcddefault
+Xft.dpi:       96
+
+Xcursor.theme: Bibata-Modern-Ice
+Xcursor.size:  24
