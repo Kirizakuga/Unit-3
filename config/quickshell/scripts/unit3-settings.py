@@ -8,6 +8,7 @@ Keys:
     display.primary <output>            screen that gets workspace 1 and the cursor
     display.side <left|right>           which side of the laptop the external screen(s) sit
     display.rate.<output> <hz>          refresh rate, chosen from the modes the screen supports
+    display.wideColor <true|false>      wide color gamut (default off; only useful with 10-bit output)
     lock.idle <minutes>                 0 = never lock when idle
     lock.sleep <true|false>             lock before suspend
     power.profile <name>                powerprofilesctl profile
@@ -34,7 +35,7 @@ LOCK_CMD = "~/.config/quickshell/lock.sh --fast"
 BACKLIGHT = "amdgpu_bl2"
 
 DEFAULTS = {
-    "display": {"primary": "DP-1", "side": "right",
+    "display": {"primary": "DP-1", "side": "right", "wideColor": False,
                 "rates": {"eDP-2": 165.02, "DP-1": 200.0}},
     "lock": {"idle": 10, "sleep": False},
     "shell": {"player": True, "playerBg": True, "companions": False},
@@ -95,8 +96,11 @@ def write_monitors(data):
     for m in ordered:
         rate = d["rates"].get(m["name"], m["rates"][0] if m["rates"] else m["rate"])
         mode = f"{m['width']}x{m['height']}@{rate:g}"
+        # Wide color gamut off by default: Hyprland enables it on BT.2020-capable screens,
+        # which warns (and can band) unless the screen also runs in 10-bit.
+        wcg = 1 if d.get("wideColor") else -1
         lines.append(f'hl.monitor({{ output = "{m["name"]}", mode = "{mode}", '
-                     f'position = "{x}x0", scale = 1 }})')
+                     f'position = "{x}x0", scale = 1, supports_wide_color = {wcg} }})')
         x += m["width"]
     primary = d["primary"] if any(m["name"] == d["primary"] for m in mons) else \
         (external[0]["name"] if external else (mons[0]["name"] if mons else d["primary"]))
@@ -161,6 +165,9 @@ def set_key(key, value):
         save(data); write_monitors(data)
     elif key == "display.side":
         data["display"]["side"] = "left" if value == "left" else "right"
+        save(data); write_monitors(data)
+    elif key == "display.wideColor":
+        data["display"]["wideColor"] = as_bool(value)
         save(data); write_monitors(data)
     elif key.startswith("display.rate."):
         data["display"]["rates"][key[len("display.rate."):]] = float(value)
