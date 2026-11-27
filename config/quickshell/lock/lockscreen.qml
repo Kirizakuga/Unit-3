@@ -172,9 +172,13 @@ ShellRoot {
         authProc.running = true
     }
 
+    // Password accepted: show the wipe overlays (same background, so nothing flashes),
+    // then unlock the session underneath them and let the wave uncover the desktop.
     function doHide() {
         root.hiding = true
+        unlockTimer.start()
     }
+    Timer { id: unlockTimer; interval: 60; onTriggered: sessionLock.locked = false }
 
     // ── Gestion du curseur Hyprland ──
     // Le curseur natif Hyprland est conservé, rien à faire côté lockscreen.
@@ -188,24 +192,19 @@ ShellRoot {
         }
     }
 
-    // ── Screens ──
-    Variants {
-        model: Quickshell.screens
-        PanelWindow {
-            required property var modelData
-            screen: modelData
-            anchors.top:true;anchors.left:true;anchors.right:true;anchors.bottom:true
-            exclusionMode: ExclusionMode.Ignore
-            // Transparent so the unlock wipe reveals the desktop; the black backdrop below covers it while locked
-            color: "transparent"
-            implicitWidth: modelData.width; implicitHeight: modelData.height
-            WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: (root.frozen && !root.hiding && !root.done)
-                ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-
-            property bool isPrimary: modelData.name === Quickshell.screens[0].name
-            // The lock background stays up until the unlock video has its first frame (no flash)
-            property bool hideStarted: root.hiding && hide.position > 0
+    // ── Real session lock (ext-session-lock) ──
+    // While locked, Hyprland shows only these surfaces and gives them the keyboard. If this
+    // process ever dies, the session stays locked; running the lock again takes it back over
+    // (misc.allow_session_lock_restore in hypr/unit3.lua).
+    WlSessionLock {
+        id: sessionLock
+        locked: true
+        WlSessionLockSurface {
+            color: "black"
+            readonly property var modelData: screen   // the old per-screen window used modelData
+            property bool isPrimary: screen !== null && screen.name === Quickshell.screens[0].name
+            // the unlock wipe now plays in a separate overlay after the session unlocks
+            readonly property bool hideStarted: false
 
             Rectangle { anchors.fill: parent; color: "black"; z: -1; visible: !root.hiding && !root.done }
 
@@ -245,51 +244,6 @@ ShellRoot {
                 id: voReveal
                 anchors.fill: parent
                 visible: !root.fastMode && !hideStarted && !root.done
-            }
-
-            // ── Hide ──
-            MediaPlayer {
-                id: hide
-                source: "file://" + root.xdgConfigHome + "/quickshell/videos/wave_hide.mp4"
-                videoOutput: voHide
-                audioOutput: null
-                loops: 1
-                autoPlay: false
-                onMediaStatusChanged: function() {
-                    // Fermeture gérée par hideFadeAnim.onFinished
-                }
-            }
-            VideoOutput {
-                id: voHide
-                anchors.fill: parent
-                z: 1
-                visible: root.hiding || root.done
-                opacity: 1.0
-                // Key out the black of the wave so it uncovers the desktop instead of going black
-                layer.enabled: true
-                layer.effect: ShaderEffect {
-                    property variant source
-                    fragmentShader: Qt.resolvedUrl("lumakey.frag.qsb")
-                }
-            }
-
-            // Fade + fermeture 1s avant la fin de hide
-            Timer {
-                id: hideFadeTimer
-                interval: 800
-                repeat: false
-                onTriggered: hideFadeAnim.start()
-            }
-            NumberAnimation {
-                id: hideFadeAnim
-                target: voHide; property: "opacity"
-                from: 1.0; to: 0.0
-                duration: 400
-                easing.type: Easing.InQuad
-                onFinished: {
-                    root.done = true
-                    exitTimer.restart()
-                }
             }
 
             // ── UI Lockscreen ──
@@ -359,7 +313,7 @@ ShellRoot {
                         id:tickTxt
                         text:"SYSTEM SCAN · OK ▸ MEMORY INTEGRITY · VERIFIED ▸ SESSION LOCKED · SECURE ▸ NETWORK UPLINK · STABLE ▸ THERMAL · NOMINAL ▸ AUTH DAEMON · LISTENING ▸ "
                         font.family: "JetBrains Mono";font.pixelSize:8;font.letterSpacing:3;color:"#463f2e";y:2
-                        NumberAnimation on x { from:modelData.width; to:-tickTxt.implicitWidth; duration:55000; loops:Animation.Infinite; running:root.frozen }
+                        NumberAnimation on x { from:(modelData ? modelData.width : 1920); to:-tickTxt.implicitWidth; duration:55000; loops:Animation.Infinite; running:root.frozen }
                     }
                 }
 
@@ -384,10 +338,8 @@ ShellRoot {
                         }
                         NumberAnimation{target:wipeScale;property:"yScale";to:0;duration:460;easing.type:Easing.OutExpo}
                         onFinished: {
-                            if (isPrimary) {
-                                pwInput.forceActiveFocus()
-                                focusRetry.restart()
-                            }
+                            pwInput.forceActiveFocus()
+                            focusRetry.restart()
                         }
                     }
 
@@ -647,9 +599,6 @@ ShellRoot {
                     if (root.hiding) {
                         reveal.stop()
                         panelHide.start()
-                        hide.position = 0
-                        hide.play()
-                        if (isPrimary) hideFadeTimer.restart()
                     }
                 }
                 function onRevealingChanged() {
@@ -672,10 +621,8 @@ ShellRoot {
                 onTriggered: {
                     if (root.fastMode) {
                         wipeScale.yScale = 0
-                        if (isPrimary) {
-                            pwInput.forceActiveFocus()
-                            focusRetry.restart()
-                        }
+                        pwInput.forceActiveFocus()
+                        focusRetry.restart()
                     } else {
                         panelReveal.start()
                     }
@@ -687,9 +634,65 @@ ShellRoot {
                     reveal.position = 0
                     reveal.play()
                 }
+                // Session-lock surfaces are created after the lock has started, so they miss the
+                // frozen/revealing change that opens the panel: open it from the current state.
+                if (root.frozen || root.revealing) panelOpenTimer.restart()
             }
         }
     }
+
+    // ── Unlock wipe: a transparent overlay that plays the wave over the (now unlocked) desktop ──
+    Variants {
+        model: root.hiding ? Quickshell.screens : []
+        PanelWindow {
+            id: wipeWin
+            required property var modelData
+            screen: modelData
+            anchors { top: true; left: true; right: true; bottom: true }
+            exclusionMode: ExclusionMode.Ignore
+            color: "transparent"
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.namespace: "unit3-unlock-wipe"
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
+            readonly property bool isPrimary: modelData.name === Quickshell.screens[0].name
+            readonly property bool hideStarted: hide.position > 0
+
+            // the lock's background, until the wave's first frame is ready
+            Image {
+                anchors.fill: parent
+                source: "file://" + root.xdgConfigHome + "/quickshell/videos/wave_last_frame.png"
+                fillMode: Image.PreserveAspectCrop
+                visible: !wipeWin.hideStarted
+            }
+            MediaPlayer {
+                id: hide
+                source: "file://" + root.xdgConfigHome + "/quickshell/videos/wave_hide.mp4"
+                videoOutput: voHide
+                audioOutput: null
+                Component.onCompleted: play()
+            }
+            VideoOutput {
+                id: voHide
+                anchors.fill: parent
+                // key out the black of the wave so it uncovers the desktop
+                layer.enabled: true
+                layer.effect: ShaderEffect {
+                    property variant source
+                    fragmentShader: Qt.resolvedUrl("lumakey.frag.qsb")
+                }
+            }
+            Timer { interval: 800; running: true; onTriggered: wipeFade.start() }
+            NumberAnimation {
+                id: wipeFade
+                target: voHide; property: "opacity"; to: 0.0
+                duration: 400; easing.type: Easing.InQuad
+                onFinished: if (wipeWin.isPrimary) Qt.quit()
+            }
+        }
+    }
+    // safety net: never linger after unlocking
+    Timer { running: root.hiding; interval: 4000; onTriggered: Qt.quit() }
 
     // Horloge
     property string clockStr:  "--:--"

@@ -77,3 +77,7 @@ hl.bind("SUPER + M", function()
     end
     hl.exec_cmd("spotify")
 end)
+
+-- Real session lock (quickshell/lock/lockscreen.qml uses WlSessionLock): if the lockscreen ever
+-- crashes, the session stays locked; running the lock again (SUPER+L / lock.sh) takes it back over.
+hl.config({ misc = { allow_session_lock_restore = true } })

@@ -18,6 +18,8 @@
   W / Q / Delete or × closes a window without leaving the switcher.
 - **Minimize:** `SUPER+N` hides the focused window; it shows up in Alt+Tab tagged MIN, and picking it brings it back.
 - **Fix:** `SUPER+M` (Spotify scratchpad) works again on Hyprland 0.57.
+- **Lockscreen is a real session lock** (ext-session-lock): if it ever crashes the session stays locked,
+  and pressing the lock key again takes it back over (`misc.allow_session_lock_restore`).
 - **Lockscreen:** opens in ~0.7 s (moved out of the `widgets` module), readable cream labels, unlock wipe reveals the desktop,
   no second lock right after login.
   A **now playing** card (MPRIS: Spotify, browsers, VLC…) appears under the login box when music is playing,
