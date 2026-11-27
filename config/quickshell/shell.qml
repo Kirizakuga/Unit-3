@@ -16,6 +16,7 @@ ShellRoot {
     ControlCenter {}
     AltTab {}
     CheatSheet {}
+    Overview {}
 
 
     // ── VOLUMEBAR ──

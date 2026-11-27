@@ -84,3 +84,6 @@ hl.config({ misc = { allow_session_lock_restore = true } })
 
 -- Shortcut cheat sheet (quickshell/widgets/CheatSheet.qml), built from these descriptions
 hl.bind("SUPER + slash", hl.dsp.exec_cmd("qs ipc call cheatsheet toggle"), { description = "Shell · Shortcut cheat sheet" })
+
+-- Workspace overview with live previews (quickshell/widgets/Overview.qml)
+hl.bind("SUPER + A", hl.dsp.exec_cmd("qs ipc call overview toggle"), { description = "Workspaces · Overview" })
