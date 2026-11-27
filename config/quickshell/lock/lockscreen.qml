@@ -12,9 +12,13 @@ ShellRoot {
     // Reactive: re-evaluates the moment a player appears or starts/stops playing
     // (the player list fills in over D-Bus just after this process starts).
     readonly property var playingPlayer: {
-        var ps = Mpris.players.values
-        for (var i = 0; i < ps.length; i++) if (ps[i].isPlaying) return ps[i]
-        return null
+        var ps = Mpris.players.values, first = null
+        for (var i = 0; i < ps.length; i++) {
+            if (!ps[i].isPlaying) continue
+            if (ps[i].trackArtUrl) return ps[i]   // browsers can expose a track twice: prefer the entry with art
+            if (!first) first = ps[i]
+        }
+        return first
     }
     property var  mprisPlayer: null
     property bool musicLatched: false
@@ -29,6 +33,71 @@ ShellRoot {
         running: !root.done && root.mprisPlayer !== null && root.mprisPlayer.isPlaying
         onTriggered: root.mprisPlayer.positionChanged()
     }
+    // ── Cover art: player art → same track from another player → YouTube thumbnail → iTunes lookup ──
+    // "(12) Song - YouTube" and "Song" are the same track
+    function cleanTitle(t) {
+        return String(t || "").replace(/^\(\d+\)\s*/, "").replace(/\s+-\s+YouTube( Music)?$/, "").trim().toLowerCase()
+    }
+    function youtubeId(url) {
+        var m = String(url || "").match(/(?:[?&]v=|youtu\.be\/|\/shorts\/|\/embed\/)([A-Za-z0-9_-]{11})/)
+        return m ? m[1] : ""
+    }
+    readonly property string directArt: {
+        var p = mprisPlayer
+        if (!p) return ""
+        if (p.trackArtUrl) return p.trackArtUrl
+        var ps = Mpris.players.values
+        // browsers often expose the same track twice (e.g. Brave + plasma-browser-integration); one may have art
+        for (var i = 0; i < ps.length; i++)
+            if (ps[i] !== p && cleanTitle(ps[i].trackTitle) === cleanTitle(p.trackTitle) && ps[i].trackArtUrl) return ps[i].trackArtUrl
+        var all = [p].concat(ps)
+        for (var j = 0; j < all.length; j++) {
+            if (j > 0 && cleanTitle(all[j].trackTitle) !== cleanTitle(p.trackTitle)) continue
+            var id = youtubeId(all[j].metadata ? all[j].metadata["xesam:url"] : "")
+            if (id) return "https://i.ytimg.com/vi/" + id + "/maxresdefault.jpg"
+        }
+        return ""
+    }
+    property string lookedUpArt: ""
+    property string lookedUpFor: ""
+    // not every YouTube video has a max-resolution thumbnail: fall back to the standard one
+    property string failedArt: ""
+    readonly property string coverUrl: {
+        var u = directArt !== "" ? directArt : lookedUpArt
+        return (u === failedArt && u.indexOf("maxresdefault") >= 0) ? u.replace("maxresdefault", "hqdefault") : u
+    }
+    // Last resort for players that send no art: look the track up in Apple's public iTunes catalog
+    function maybeLookUpArt() {
+        var p = mprisPlayer
+        if (!p || directArt !== "" || !p.trackTitle) return
+        var key = (p.trackArtist || "") + " " + p.trackTitle
+        if (key === lookedUpFor) return
+        lookedUpFor = key; lookedUpArt = ""
+        artLookup.command = ["curl", "-s", "--max-time", "5",
+            "https://itunes.apple.com/search?entity=song&limit=1&term=" + encodeURIComponent(key.trim())]
+        artLookup.running = true
+    }
+    onDirectArtChanged: maybeLookUpArt()
+    onMprisPlayerChanged: maybeLookUpArt()
+    Connections {
+        target: root.mprisPlayer
+        ignoreUnknownSignals: true
+        function onTrackTitleChanged() { root.maybeLookUpArt() }
+    }
+    Process {
+        id: artLookup
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    var r = JSON.parse(this.text).results
+                    if (r && r.length && r[0].artworkUrl100)
+                        root.lookedUpArt = r[0].artworkUrl100.replace("100x100bb", "600x600bb")
+                } catch (e) {}
+            }
+        }
+    }
+
     function fmtTime(sec) {
         if (!(sec > 0)) return "0:00"
         var s = Math.floor(sec % 60)
@@ -480,9 +549,10 @@ ShellRoot {
                         Image {
                             id: art
                             anchors.fill: parent; anchors.margins: 1
-                            source: musicCard.p ? musicCard.p.trackArtUrl : ""
+                            source: root.coverUrl
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
+                            onStatusChanged: if (status === Image.Error) root.failedArt = String(source)
                         }
                         Text { anchors.centerIn: parent; visible: art.status !== Image.Ready
                                text: "♪"; font.pixelSize: 26; color: "#463f2e" }
@@ -494,7 +564,7 @@ ShellRoot {
                         width: musicCard.width - x - 16
                         spacing: 3
                         Text { width: parent.width; elide: Text.ElideRight
-                               text: musicCard.p ? musicCard.p.trackTitle : ""
+                               text: musicCard.p ? String(musicCard.p.trackTitle).replace(/^\(\d+\)\s*/, "").replace(/\s+-\s+YouTube( Music)?$/, "") : ""
                                font.family: "JetBrains Mono"; font.pixelSize: 12; font.weight: Font.Medium; color: "#463f2e" }
                         Text { width: parent.width; elide: Text.ElideRight
                                text: musicCard.p ? (musicCard.p.trackArtist || musicCard.p.trackAlbum || "") : ""
