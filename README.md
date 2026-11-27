@@ -31,7 +31,8 @@
   no second lock right after login.
   A **now playing** card (MPRIS: Spotify, browsers, VLC…) appears under the login box when music is playing,
   with album art, progress and ⏮ ⏯ ⏭ controls.
-- **SDDM login theme `unit3`** matching the lockscreen (`config/sddm/`), plus an example Xsetup for monitor layout.
+- **SDDM login theme `unit3`** matching the lockscreen: your avatar, `user@host`, distro + GPU
+  (`config/sddm/unit3-sddm-sync.sh` installs it and fills these in), plus an example Xsetup for monitor layout.
 - **App themes in the same palette and JetBrains Mono:** GTK3/4 (`adw-gtk3` + `gtk.css`), Qt/KDE (`Unit3.colors`),
   kitty, Spotify (Spicetify theme `unit3`).
 - **Survives updates:** pacman hooks re-apply sand Papirus folders and the Spotify theme after every update;
@@ -47,7 +48,7 @@ cp -r config/gtk-3.0 config/gtk-4.0 config/fontconfig ~/.config/
 mkdir -p ~/.local/share/color-schemes && cp config/color-schemes/Unit3.colors ~/.local/share/color-schemes/
 # Qt apps: set ColorScheme=Unit3 in ~/.config/kdeglobals (QT_QPA_PLATFORMTHEME=kde is set in unit3.lua)
 cp -r config/spicetify/Themes/unit3 ~/.config/spicetify/Themes/ && spicetify config current_theme unit3 color_scheme unit3 && spicetify apply
-sudo cp -r config/sddm/unit3 /usr/share/sddm/themes/ && sudo cp config/sddm/10-unit3.conf /etc/sddm.conf.d/
+config/sddm/unit3-sddm-sync.sh && sudo cp config/sddm/10-unit3.conf /etc/sddm.conf.d/   # login theme + your avatar, name, distro/GPU
 sudo cp config/system/pacman-hooks/*.hook /etc/pacman.d/hooks/ && sudo install -m755 config/system/pacman-hooks/unit3-spotify-retheme /usr/local/bin/
 cp config/Xresources ~/.Xresources   # X11 apps (Steam, Proton) get the same font smoothing and cursor
 ```

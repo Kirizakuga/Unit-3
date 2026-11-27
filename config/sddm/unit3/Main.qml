@@ -33,8 +33,15 @@ Rectangle {
     property bool busy: false
 
     // Repeaters always instantiate, which gives us role values for each user/session
-    Repeater { id: users; model: userModel; delegate: Item { property string uname: model.name } }
+    Repeater { id: users; model: userModel; delegate: Item { property string uname: model.name; property string uicon: model.icon || "" } }
     Repeater { id: sessions; model: sessionModel; delegate: Item { property string sname: model.name } }
+    readonly property string userIcon: {
+        var it = users.count > 0 ? users.itemAt(userIndex) : null
+        return it ? it.uicon : ""
+    }
+    // machine name and distro/GPU, written into theme.conf by unit3-sddm-sync.sh
+    readonly property string node: config.stringValue("node") || sddm.hostName || "localhost"
+    readonly property string sysTag: config.stringValue("sysTag") || ""
     readonly property string userName: {
         var it = users.count > 0 ? users.itemAt(userIndex) : null
         return it ? it.uname : (userModel.lastUser || "")
@@ -83,7 +90,7 @@ Rectangle {
     }
 
     component Label: Text {
-        font.family: root.mono; font.pixelSize: 9; font.letterSpacing: 2; color: root.ink
+        font.family: root.mono; font.pixelSize: 12; font.letterSpacing: 2; color: root.ink
     }
     // Label with a paper backing so it stays readable on the grid background
     component Tag: Label {
@@ -103,14 +110,14 @@ Rectangle {
                     NumberAnimation { to: 0.3; duration: 900 } NumberAnimation { to: 1; duration: 900 } } }
             Tag { text: "AWAITING AUTHENTICATION" }
         }
-        Tag { text: "NODE · " + (sddm.hostName || "localhost") }
-        Text { text: "認証待機中"; font.family: root.jp; font.pixelSize: 8; color: root.ink; opacity: 0.7 }
+        Tag { text: "NODE · " + root.userName + "@" + root.node }
+        Text { text: "認証待機中"; font.family: root.jp; font.pixelSize: 10; color: root.ink; opacity: 0.7 }
     }
     Column {
         anchors { top: parent.top; right: parent.right; topMargin: 28; rightMargin: 30 }
         spacing: 2
-        Tag { text: root.clockFull; width: 220; horizontalAlignment: Text.AlignRight }
-        Tag { text: root.dateStr; width: 220; horizontalAlignment: Text.AlignRight }
+        Tag { text: root.clockFull; width: 320; horizontalAlignment: Text.AlignRight }
+        Tag { text: root.dateStr; width: 320; horizontalAlignment: Text.AlignRight }
     }
 
     // Bottom-left: session picker (click to cycle)
@@ -122,6 +129,7 @@ Rectangle {
             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                 onClicked: root.sessionIndex = (root.sessionIndex + 1) % Math.max(1, sessionModel.rowCount()) } }
         Tag { text: "WM · hyprland" }
+        Tag { text: root.sysTag; visible: root.sysTag !== "" }
     }
 
     // Bottom-right: power actions
@@ -141,7 +149,7 @@ Rectangle {
                 color: ma.containsMouse ? root.ink : "transparent"
                 border.color: root.ink; border.width: 1
                 Behavior on color { ColorAnimation { duration: 180 } }
-                Label { id: btn; anchors.centerIn: parent; text: modelData.label; font.pixelSize: 8
+                Label { id: btn; anchors.centerIn: parent; text: modelData.label; font.pixelSize: 10
                     color: ma.containsMouse ? root.paper : root.ink }
                 MouseArea { id: ma; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                     onClicked: index === 0 ? sddm.suspend() : index === 1 ? sddm.reboot() : sddm.powerOff() }
@@ -154,7 +162,7 @@ Rectangle {
         anchors { bottom: parent.bottom; bottomMargin: 65; left: parent.left; right: parent.right }
         height: 18; clip: true
         Label {
-            id: tickTxt; y: 2; font.pixelSize: 8; font.letterSpacing: 3
+            id: tickTxt; y: 2; font.pixelSize: 10; font.letterSpacing: 3
             text: "SYSTEM SCAN · OK ▸ MEMORY INTEGRITY · VERIFIED ▸ AUTH DAEMON · LISTENING ▸ NETWORK UPLINK · STABLE ▸ THERMAL · NOMINAL ▸ AWAITING OPERATOR ▸ "
             NumberAnimation on x { from: root.width; to: -tickTxt.implicitWidth; duration: 55000; loops: Animation.Infinite }
         }
@@ -225,25 +233,39 @@ Rectangle {
                 Item { width: parent.width; height: 90
                     Rectangle { width: 76; height: 76; border.color: root.ink; border.width: 1; color: "transparent"
                         anchors.horizontalCenter: parent.horizontalCenter
+                        // the user's avatar (SDDM faces dir), framed like a photo mount
+                        Image {
+                            id: avatar
+                            anchors.fill: parent; anchors.margins: 3
+                            source: root.userIcon ? "file://" + root.userIcon : ""
+                            sourceSize: Qt.size(140, 140)
+                            fillMode: Image.PreserveAspectCrop
+                            smooth: true; mipmap: true
+                        }
+                        // fallback: the NieR emblem when there is no avatar
                         Rectangle { width: 52; height: 52; color: root.ink; anchors.centerIn: parent
+                            visible: avatar.status !== Image.Ready
                             transform: Rotation { angle: 45; origin.x: 26; origin.y: 26 } }
-                        Label { text: "NR"; font.pixelSize: 7; font.letterSpacing: 0; color: root.inkSoft; opacity: 0.5
+                        Label { text: "NR"; font.pixelSize: 9; font.letterSpacing: 0; color: root.inkSoft; opacity: 0.5
+                            visible: avatar.status !== Image.Ready
                             anchors { top: parent.top; left: parent.left; margins: 3 } }
-                        Label { text: "2B"; font.pixelSize: 7; font.letterSpacing: 0; color: root.inkSoft; opacity: 0.5
+                        Label { text: "2B"; font.pixelSize: 9; font.letterSpacing: 0; color: root.inkSoft; opacity: 0.5
+                            visible: avatar.status !== Image.Ready
                             anchors { bottom: parent.bottom; right: parent.right; margins: 3 } }
                     }
                 }
 
                 // Username (click to cycle users when there are several)
                 Label {
-                    text: root.userName.toUpperCase() + (userModel.count > 1 ? "  ⇄" : "")
-                    font.pixelSize: 13; font.letterSpacing: 3
+                    text: root.userName + "@" + root.node + (userModel.count > 1 ? "  ⇄" : "")
+                    width: Math.min(implicitWidth, parent.width); elide: Text.ElideRight
+                    font.pixelSize: 16; font.letterSpacing: 2
                     anchors.horizontalCenter: parent.horizontalCenter
                     MouseArea { anchors.fill: parent; enabled: userModel.count > 1; cursorShape: Qt.PointingHandCursor
                         onClicked: root.userIndex = (root.userIndex + 1) % userModel.count }
                 }
                 Item { width: 1; height: 4 }
-                Text { text: "ユニット · スタンバイ"; font.family: root.jp; font.pixelSize: 8; color: root.inkSoft
+                Text { text: "ユニット · スタンバイ"; font.family: root.jp; font.pixelSize: 10; color: root.inkSoft
                     anchors.horizontalCenter: parent.horizontalCenter }
                 Item { width: 1; height: 20 }
                 Label { text: root.clockStr; font.pixelSize: 46; anchors.horizontalCenter: parent.horizontalCenter }
@@ -258,12 +280,12 @@ Rectangle {
                         border.color: pwInput.activeFocus ? root.ink : Qt.rgba(70/255, 63/255, 46/255, 0.22)
                         Behavior on border.color { ColorAnimation { duration: 200 } } }
                     Text { anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
-                        text: "▸"; font.pixelSize: 10; color: root.accent }
+                        text: "▸"; font.pixelSize: 12; color: root.accent }
                     TextInput {
                         id: pwInput
                         anchors { fill: parent; leftMargin: 26; rightMargin: 10 }
                         verticalAlignment: TextInput.AlignVCenter
-                        font.family: root.mono; font.pixelSize: 12; font.letterSpacing: 2
+                        font.family: root.mono; font.pixelSize: 14; font.letterSpacing: 2
                         color: root.ink; echoMode: TextInput.Password; passwordCharacter: "·"
                         focus: true; clip: true
                         onTextEdited: root.lockError = false
@@ -271,7 +293,7 @@ Rectangle {
                         Keys.onEnterPressed: root.doAuth()
                         Keys.onEscapePressed: text = ""
                         Text { visible: parent.text === ""; anchors.verticalCenter: parent.verticalCenter
-                            text: "password..."; font.family: root.mono; font.pixelSize: 11; font.italic: true
+                            text: "password..."; font.family: root.mono; font.pixelSize: 13; font.italic: true
                             color: root.inkSoft; opacity: 0.5 }
                     }
                 }
@@ -282,7 +304,7 @@ Rectangle {
                         Rectangle { visible: index < pwInput.text.length; anchors.fill: parent; color: root.ink } } } }
                 Item { width: 1; height: 6 }
 
-                Label { text: "AUTHENTICATION FAILED"; font.pixelSize: 8; color: root.accent
+                Label { text: "AUTHENTICATION FAILED"; font.pixelSize: 10; color: root.accent
                     anchors.horizontalCenter: parent.horizontalCenter; height: 14
                     opacity: root.lockError ? 1 : 0; Behavior on opacity { NumberAnimation { duration: 200 } } }
                 Item { width: 1; height: 10 }
@@ -293,7 +315,7 @@ Rectangle {
                         color: root.ink; width: (loginMA.containsMouse || root.busy) ? parent.width : 0
                         Behavior on width { NumberAnimation { duration: 280; easing.type: Easing.InOutQuart } } }
                     Label { anchors.centerIn: parent; text: root.busy ? "AUTHENTICATING" : "LOGIN"
-                        font.pixelSize: 10; font.letterSpacing: 3
+                        font.pixelSize: 12; font.letterSpacing: 3
                         color: (loginMA.containsMouse || root.busy) ? root.paper : root.ink
                         Behavior on color { ColorAnimation { duration: 200 } } }
                     MouseArea { id: loginMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor

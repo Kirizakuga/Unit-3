@@ -36,6 +36,7 @@ HOME_PATHS=(
 # System paths (absolute) that Unit-3 customizations live in. No package owns these.
 SYS_PATHS=(
     /usr/share/sddm/themes/unit3
+    /usr/share/sddm/faces/kiri.face.icon
     /etc/sddm/Xsetup-unit3
     /etc/sddm.conf
     /etc/sddm.conf.d
