@@ -396,10 +396,23 @@ ShellRoot {
                             Item { width:parent.width;height:90
                                 Rectangle{width:76;height:76;border.color:"#463f2e";border.width:1;color:"transparent"
                                     anchors.horizontalCenter:parent.horizontalCenter
+                                    // avatar from ~/.face (the standard login-screen picture), framed like a photo mount
+                                    Image {
+                                        id: avatar
+                                        anchors.fill: parent; anchors.margins: 3
+                                        source: "file://" + root.home + "/.face"
+                                        sourceSize: Qt.size(140, 140)
+                                        fillMode: Image.PreserveAspectCrop
+                                        smooth: true; mipmap: true
+                                    }
+                                    // fallback: the original NieR emblem when there is no avatar
                                     Rectangle{width:52;height:52;color:"#463f2e";anchors.centerIn:parent
+                                        visible: avatar.status !== Image.Ready
                                         transform:Rotation{angle:45;origin.x:26;origin.y:26}}
-                                    Text{text:"NR";font.family: "JetBrains Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.top:parent.top;anchors.left:parent.left;anchors.margins:3}
-                                    Text{text:"2B";font.family: "JetBrains Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.bottom:parent.bottom;anchors.right:parent.right;anchors.margins:3}
+                                    Text{text:"NR";font.family: "JetBrains Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.top:parent.top;anchors.left:parent.left;anchors.margins:3
+                                        visible: avatar.status !== Image.Ready}
+                                    Text{text:"2B";font.family: "JetBrains Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.bottom:parent.bottom;anchors.right:parent.right;anchors.margins:3
+                                        visible: avatar.status !== Image.Ready}
                                 }
                             }
                             Text{text:root.currentUser+"@arch";font.family: "JetBrains Mono";font.pixelSize:13;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
