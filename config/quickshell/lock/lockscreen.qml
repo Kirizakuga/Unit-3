@@ -133,6 +133,50 @@ ShellRoot {
 
     property string currentUser: "user"
     property string kernel: ""
+
+    // ── Machine details, detected so the lockscreen fits whoever uses it ──
+    property string hostName: ""
+    property string sysTag: ""            // e.g. "CACHYOS · RTX 4050"
+    // optional override of the shown machine name: "lock": {"node": "…"} in settings/user.json
+    FileView {
+        path: root.home + "/.config/quickshell/settings/user.json"
+        blockLoading: true
+        JsonAdapter {
+            id: userCfg
+            property JsonObject lock: JsonObject { property string node: "" }
+        }
+    }
+    readonly property string node: userCfg.lock.node || hostName || "localhost"
+    Process {
+        command: ["sh", "-c", "cat /etc/hostname 2>/dev/null || uname -n"]; running: true
+        stdout: SplitParser { onRead: data => { if (data.trim()) root.hostName = data.trim() } }
+    }
+    Process {
+        // distro name, then one line per GPU from lspci (vendor | device)
+        command: ["sh", "-c", ". /etc/os-release 2>/dev/null; echo \"OS|${NAME:-Linux}\"; "
+                  + "lspci -mm 2>/dev/null | awk -F'\"' '$2 ~ /VGA|3D|Display/ {print \"GPU|\" $4 \"|\" $6}'"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var os = "LINUX", gpus = []
+                this.text.split("\n").forEach(function(l) {
+                    var f = l.split("|")
+                    if (f[0] === "OS") os = f[1].replace(/ Linux$/, "").toUpperCase()
+                    else if (f[0] === "GPU") gpus.push({ vendor: f[1], dev: f[2] })
+                })
+                // prefer a dedicated GPU (NVIDIA first), else whatever there is
+                var g = gpus.filter(function(x){ return /NVIDIA/i.test(x.vendor) })[0] || gpus[gpus.length - 1]
+                var name = ""
+                if (g) {
+                    var m = g.dev.match(/\[(.*)\]/)
+                    name = (m ? m[1] : g.dev).replace(/^GeForce /, "").split(/ Max-Q| \/| Mobile| Laptop/)[0].trim()
+                    if (!m && /AMD|ATI/i.test(g.vendor)) name = "AMD " + name
+                    else if (!m && /Intel/i.test(g.vendor)) name = "INTEL " + name
+                }
+                root.sysTag = name ? os + " · " + name.toUpperCase() : os
+            }
+        }
+    }
     Process {
         command:["uname","-r"]; running:true
         stdout: SplitParser { onRead: data => root.kernel = data.trim() }
@@ -276,7 +320,7 @@ ShellRoot {
                             }
                             Tag{text:"SESSION LOCKED";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
                         }
-                        Tag{text:"NODE · "+root.currentUser+"@arch";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                        Tag{text:"NODE · "+root.currentUser+"@"+root.node;width:Math.min(implicitWidth,320);elide:Text.ElideRight;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
                         Tag{text:"セッションロック中";font.family: "JetBrains Mono";font.pixelSize:8;color:"#463f2e";opacity:0.7}
                     }
                 }
@@ -300,7 +344,7 @@ ShellRoot {
                     anchors { bottom:parent.bottom; right:parent.right; bottomMargin:28; rightMargin:30 }
                     z:5; opacity:parent.uiOp
                     Column { spacing:2; anchors.bottom:parent.bottom; anchors.right:parent.right
-                        Tag{text:"CACHYOS · RTX 4050";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:220;horizontalAlignment:Text.AlignRight}
+                        Tag{text:root.sysTag;elide:Text.ElideLeft;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:220;horizontalAlignment:Text.AlignRight}
                     }
                 }
 
@@ -415,7 +459,7 @@ ShellRoot {
                                         visible: avatar.status !== Image.Ready}
                                 }
                             }
-                            Text{text:root.currentUser+"@arch";font.family: "JetBrains Mono";font.pixelSize:13;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{text:root.currentUser+"@"+root.node;width:parent.width;horizontalAlignment:Text.AlignHCenter;elide:Text.ElideRight;font.family: "JetBrains Mono";font.pixelSize:13;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:4}
                             Text{text:"ユニット · アクティブ";font.family: "JetBrains Mono";font.pixelSize:8;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:20}

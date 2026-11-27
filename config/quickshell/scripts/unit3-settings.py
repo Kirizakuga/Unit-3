@@ -11,6 +11,7 @@ Keys:
     display.wideColor <true|false>      wide color gamut (default off; only useful with 10-bit output)
     lock.idle <minutes>                 0 = never lock when idle
     lock.sleep <true|false>             lock before suspend
+    lock.node <name>                    machine name shown on the lockscreen (empty = real hostname)
     power.profile <name>                powerprofilesctl profile
     power.brightness <percent>          laptop backlight, 5-100
     shell.player <true|false>           show the music player
@@ -37,7 +38,7 @@ BACKLIGHT = "amdgpu_bl2"
 DEFAULTS = {
     "display": {"primary": "DP-1", "side": "right", "wideColor": False,
                 "rates": {"eDP-2": 165.02, "DP-1": 200.0}},
-    "lock": {"idle": 10, "sleep": False},
+    "lock": {"idle": 10, "sleep": False, "node": ""},
     "shell": {"player": True, "playerBg": True, "companions": False},
 }
 
@@ -178,6 +179,9 @@ def set_key(key, value):
     elif key == "lock.sleep":
         data["lock"]["sleep"] = as_bool(value)
         save(data); write_hypridle(data)
+    elif key == "lock.node":
+        data["lock"]["node"] = "" if value in ("", "-", "none") else value
+        save(data)
     elif key == "power.profile":
         run(["powerprofilesctl", "set", value])
     elif key == "power.brightness":
