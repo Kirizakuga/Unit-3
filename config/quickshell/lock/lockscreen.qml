@@ -3,9 +3,36 @@ import QtMultimedia
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import Quickshell.Services.Mpris
 
 ShellRoot {
     id: root
+
+    // ── Music (MPRIS): shown once something plays while locked; stays if paused from here ──
+    property var  mprisPlayer: null
+    property bool musicLatched: false
+    function pickPlayer() {
+        var ps = Mpris.players.values
+        for (var i = 0; i < ps.length; i++) if (ps[i].isPlaying) return ps[i]
+        // nothing playing: keep the current one while it's still around (e.g. paused from the lockscreen)
+        for (var j = 0; j < ps.length; j++) if (ps[j] === mprisPlayer) return mprisPlayer
+        return null
+    }
+    Timer {
+        interval: 500; running: !root.done; repeat: true; triggeredOnStart: true
+        onTriggered: {
+            root.mprisPlayer = root.pickPlayer()
+            if (root.mprisPlayer && root.mprisPlayer.isPlaying) {
+                root.musicLatched = true
+                root.mprisPlayer.positionChanged()   // MPRIS doesn't push position; ask for it
+            }
+        }
+    }
+    function fmtTime(sec) {
+        if (!(sec > 0)) return "0:00"
+        var s = Math.floor(sec % 60)
+        return Math.floor(sec / 60) + ":" + (s < 10 ? "0" : "") + s
+    }
 
     // ── Fast mode (skip reveal animation, used for lid-switch lock) ──
     property bool fastMode: Quickshell.env("UNIT3_LOCK_FAST") === "1"
@@ -409,6 +436,120 @@ ShellRoot {
                                 MouseArea{id:unlockMA;anchors.fill:parent;hoverEnabled:true
                                     onEntered:unlockFill.width=parent.width;onExited:unlockFill.width=0
                                     onClicked:root.doAuth()}
+                            }
+                        }
+                    }
+                }
+
+                // ── Now playing (MPRIS) — under the login panel, same style ──
+                Rectangle {
+                    id: musicCard
+                    readonly property var p: root.mprisPlayer
+                    visible: root.musicLatched && p !== null && p.trackTitle !== ""
+                    // some players (e.g. browsers) don't report playback position
+                    readonly property bool hasPos: p !== null && p.positionSupported && p.length > 0
+                    anchors.top: panelHost.bottom
+                    anchors.topMargin: 18
+                    anchors.horizontalCenter: panelHost.horizontalCenter
+                    anchors.horizontalCenterOffset: panelHost.anchors.horizontalCenterOffset
+                    width: 380; height: 124
+                    z: 6
+                    opacity: parent.uiOp * panelHost.opacity
+                    color: "#d6cfb5"
+                    border.color: "#463f2e"; border.width: 1
+                    clip: true
+
+                    Repeater { model: 20; Rectangle { x: index*20; width: 1; height: musicCard.height; color: Qt.rgba(70/255,63/255,46/255,0.06) } }
+                    Repeater { model: 7;  Rectangle { y: index*20; width: musicCard.width; height: 1; color: Qt.rgba(70/255,63/255,46/255,0.06) } }
+
+                    // header
+                    Row {
+                        x: 16; y: 10; spacing: 6
+                        Rectangle { width: 5; height: 5; radius: 3; color: "#6e2a2a"; anchors.verticalCenter: parent.verticalCenter
+                            opacity: musicCard.p && musicCard.p.isPlaying ? 1 : 0.35 }
+                        Text { text: "NOW PLAYING · " + (musicCard.p ? String(musicCard.p.identity).toUpperCase() : "")
+                               font.family: "JetBrains Mono"; font.pixelSize: 8; font.letterSpacing: 2; color: "#7a7358" }
+                    }
+
+                    // cover
+                    Rectangle {
+                        id: cover
+                        x: 16; y: 30; width: 78; height: 78
+                        color: "#c8b89a"; border.color: "#463f2e"; border.width: 1
+                        Image {
+                            id: art
+                            anchors.fill: parent; anchors.margins: 1
+                            source: musicCard.p ? musicCard.p.trackArtUrl : ""
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                        }
+                        Text { anchors.centerIn: parent; visible: art.status !== Image.Ready
+                               text: "♪"; font.pixelSize: 26; color: "#463f2e" }
+                    }
+
+                    // text + progress
+                    Column {
+                        x: cover.x + cover.width + 14; y: 30
+                        width: musicCard.width - x - 16
+                        spacing: 3
+                        Text { width: parent.width; elide: Text.ElideRight
+                               text: musicCard.p ? musicCard.p.trackTitle : ""
+                               font.family: "JetBrains Mono"; font.pixelSize: 12; font.weight: Font.Medium; color: "#463f2e" }
+                        Text { width: parent.width; elide: Text.ElideRight
+                               text: musicCard.p ? (musicCard.p.trackArtist || musicCard.p.trackAlbum || "") : ""
+                               font.family: "JetBrains Mono"; font.pixelSize: 10; color: "#7a7358" }
+                        Item { width: 1; height: 6 }
+                        Rectangle {
+                            width: parent.width; height: 3
+                            color: Qt.rgba(70/255,63/255,46/255,0.18)
+                            visible: musicCard.hasPos
+                            Rectangle {
+                                height: parent.height; color: "#463f2e"
+                                width: (musicCard.p && musicCard.p.length > 0)
+                                       ? parent.width * Math.min(1, musicCard.p.position / musicCard.p.length) : 0
+                            }
+                        }
+                        Item {
+                            width: parent.width; height: 26
+                            Text { anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
+                                   visible: musicCard.hasPos
+                                   text: musicCard.p ? root.fmtTime(musicCard.p.position) + " / " + root.fmtTime(musicCard.p.length) : ""
+                                   font.family: "JetBrains Mono"; font.pixelSize: 9; color: "#7a7358" }
+                            // controls
+                            Row {
+                                anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
+                                spacing: 6
+                                Repeater {
+                                    model: [
+                                        { glyph: "◀◀", act: "prev" },
+                                        { glyph: "", act: "toggle" },
+                                        { glyph: "▶▶", act: "next" }
+                                    ]
+                                    Rectangle {
+                                        required property var modelData
+                                        width: 34; height: 22
+                                        color: btnMouse.containsMouse ? "#463f2e" : "transparent"
+                                        border.color: "#463f2e"; border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: modelData.act === "toggle"
+                                                  ? (musicCard.p && musicCard.p.isPlaying ? "❚❚" : "▶") : modelData.glyph
+                                            font.pixelSize: 9; font.letterSpacing: -1
+                                            color: btnMouse.containsMouse ? "#d6cfb5" : "#463f2e"
+                                        }
+                                        MouseArea {
+                                            id: btnMouse
+                                            anchors.fill: parent; hoverEnabled: true
+                                            onClicked: {
+                                                var pl = musicCard.p; if (!pl) return
+                                                if (modelData.act === "prev" && pl.canGoPrevious) pl.previous()
+                                                else if (modelData.act === "next" && pl.canGoNext) pl.next()
+                                                else if (modelData.act === "toggle" && pl.canTogglePlaying) pl.togglePlaying()
+                                                pwInput.forceActiveFocus()   // keep typing the password
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

@@ -20,6 +20,8 @@
 - **Fix:** `SUPER+M` (Spotify scratchpad) works again on Hyprland 0.57.
 - **Lockscreen:** opens in ~0.7 s (moved out of the `widgets` module), readable cream labels, unlock wipe reveals the desktop,
   no second lock right after login.
+  A **now playing** card (MPRIS: Spotify, browsers, VLC…) appears under the login box when music is playing,
+  with album art, progress and ⏮ ⏯ ⏭ controls.
 - **SDDM login theme `unit3`** matching the lockscreen (`config/sddm/`), plus an example Xsetup for monitor layout.
 - **App themes in the same palette and JetBrains Mono:** GTK3/4 (`adw-gtk3` + `gtk.css`), Qt/KDE (`Unit3.colors`),
   kitty, Spotify (Spicetify theme `unit3`).
