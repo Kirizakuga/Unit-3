@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Mpris
+import Quickshell.Services.UPower
 
 ShellRoot {
     id: root
@@ -133,6 +134,48 @@ ShellRoot {
 
     property string currentUser: "user"
     property string kernel: ""
+
+    // ── Battery (UPower) ──
+    readonly property var bat: UPower.displayDevice
+    readonly property bool hasBattery: bat.ready && bat.isLaptopBattery && bat.isPresent
+    readonly property int batPct: Math.round(bat.percentage * 100)
+    readonly property bool batLow: hasBattery && UPower.onBattery && batPct <= 20
+    function fmtDur(sec) {
+        var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60)
+        return h > 0 ? h + "H " + m + "M" : m + "M"
+    }
+    readonly property string batText: {
+        if (!hasBattery) return ""
+        var t = "BAT " + batPct + "%"
+        if (bat.state === UPowerDeviceState.Charging)          t += " · CHARGING"
+        else if (bat.state === UPowerDeviceState.FullyCharged) t += " · FULL"
+        else if (batLow)                                       t += " · LOW"
+        else if (UPower.onBattery && bat.timeToEmpty > 0)      t += " · " + fmtDur(bat.timeToEmpty)
+        return t
+    }
+
+    // ── Notifications that arrived while locked: a count only, never their content ──
+    property int notifBase: -1
+    property int notifNow: 0
+    readonly property int newNotifs: notifBase < 0 ? 0 : Math.max(0, notifNow - notifBase)
+    Process {
+        id: notifPoll
+        command: ["qs", "ipc", "call", "notifs", "getCount"]
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var n = parseInt(this.text.trim())
+                if (isNaN(n)) return
+                if (root.notifBase < 0 || n < root.notifBase) root.notifBase = n   // first read, or history trimmed
+                root.notifNow = n
+            }
+        }
+    }
+    Timer {
+        interval: 2000; repeat: true; triggeredOnStart: true
+        running: !root.done && !root.hiding
+        onTriggered: if (!notifPoll.running) notifPoll.running = true
+    }
 
     // ── Machine details, detected so the lockscreen fits whoever uses it ──
     property string hostName: ""
@@ -330,6 +373,10 @@ ShellRoot {
                     Column { spacing:2; anchors.right:parent.right
                         Tag{text:root.clockFull;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:200;horizontalAlignment:Text.AlignRight}
                         Tag{text:root.dateStr;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:200;horizontalAlignment:Text.AlignRight}
+                        Tag{text:root.batText;visible:root.hasBattery;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2
+                            color: root.batLow ? "#6e2a2a" : "#463f2e";width:200;horizontalAlignment:Text.AlignRight}
+                        Tag{text:root.newNotifs + (root.newNotifs === 1 ? " NEW NOTIFICATION" : " NEW NOTIFICATIONS");visible:root.newNotifs > 0
+                            font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#6e2a2a";width:200;horizontalAlignment:Text.AlignRight}
                     }
                 }
                 Item {

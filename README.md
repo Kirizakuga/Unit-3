@@ -25,7 +25,9 @@
 - **Lockscreen is a real session lock** (ext-session-lock): if it ever crashes the session stays locked,
   and pressing the lock key again takes it back over (`misc.allow_session_lock_restore`).
 - **Lockscreen:** shows your avatar (`~/.face`), `user@hostname` and your distro + GPU, all detected;
-  to show another machine name: `unit3-settings.py set lock.node <name>`. Opens in ~0.7 s (moved out of the `widgets` module), readable cream labels, unlock wipe reveals the desktop,
+  to show another machine name: `unit3-settings.py set lock.node <name>`. Opens in ~0.7 s
+  Battery (charging / full / time left / low) and a count of notifications that arrived while locked
+  (count only, never their content). (moved out of the `widgets` module), readable cream labels, unlock wipe reveals the desktop,
   no second lock right after login.
   A **now playing** card (MPRIS: Spotify, browsers, VLC…) appears under the login box when music is playing,
   with album art, progress and ⏮ ⏯ ⏭ controls.
