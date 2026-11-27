@@ -99,7 +99,8 @@ sudo papirus-folders -C paleorange --theme Papirus-Dark >/dev/null 2>&1 && note 
 new_spicetify=$(pacman -Q spicetify-cli spicetify-marketplace-bin 2>/dev/null)
 if [[ -f /opt/spotify/Apps/xpui.spa ]]; then
     note "Spotify is unthemed (new install or update): re-theming."
-    sudo chmod a+wr /opt/spotify && sudo chmod -R a+wr /opt/spotify/Apps
+    # Spicetify only needs /opt/spotify/Apps: give that folder to you, keep /opt/spotify root-owned 755
+    sudo chmod 755 /opt/spotify && sudo chown -R --no-dereference "$USER:$USER" /opt/spotify/Apps
     # the extracted folders next to fresh .spa files are Spicetify's stale copies
     for app in xpui login; do
         [[ -f /opt/spotify/Apps/$app.spa && -d /opt/spotify/Apps/$app ]] && rm -rf "/opt/spotify/Apps/$app"

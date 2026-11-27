@@ -169,13 +169,13 @@ Scope {
                         Rectangle { width: 2; height: 10; color: root.colSand; x: index % 2 === 0 ? 0 : 8 }
                     }
                 }
-                Text {
+                Text { textFormat: Text.PlainText;
                     id: header
                     x: 28; y: 18
                     text: "WORKSPACES · " + root.tiles.length
                     font.family: root.fontName; font.pixelSize: 11; font.letterSpacing: 4; color: root.colSand
                 }
-                Text {
+                Text { textFormat: Text.PlainText;
                     anchors { right: parent.right; rightMargin: 28; verticalCenter: header.verticalCenter }
                     text: "CLICK window · ←→↑↓ + ENTER · 1…0 · ESC"
                     font.family: root.fontName; font.pixelSize: 9; font.letterSpacing: 1.5; color: root.colInk
@@ -253,7 +253,7 @@ Scope {
                                     width: numText.implicitWidth + 12; height: 18
                                     color: tileCol.isSel ? root.colSand : "transparent"
                                     border.color: root.colSand; border.width: 1
-                                    Text {
+                                    Text { textFormat: Text.PlainText;
                                         id: numText
                                         anchors.centerIn: parent
                                         text: tileCol.modelData.name
@@ -261,7 +261,7 @@ Scope {
                                         color: tileCol.isSel ? root.colDark : root.colSand
                                     }
                                 }
-                                Text {
+                                Text { textFormat: Text.PlainText;
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: tileCol.modelData.wins.length + (tileCol.modelData.wins.length === 1 ? " window" : " windows")
                                           + (tileCol.modelData.focused ? " · here" : "") + " · " + tileCol.modelData.monitor

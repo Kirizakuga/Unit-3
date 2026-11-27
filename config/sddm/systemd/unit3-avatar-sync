@@ -1,0 +1,20 @@
+#!/bin/bash
+# Copy a user's ~/.face to the SDDM faces folder. Run as root by unit3-avatar@<user>.service.
+# Safe against a symlinked or swapped ~/.face: the file is read AS THE USER (so it can never
+# expose a file the user can't read themselves) and only real JPEG/PNG images are accepted.
+set -euo pipefail
+user="${1:-}"
+[[ "$user" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]] || { echo "bad user name"; exit 1; }
+home="$(getent passwd "$user" | cut -d: -f6)"
+[[ -n "$home" && -d "$home" ]] || { echo "no home for $user"; exit 1; }
+
+tmp="$(mktemp)"; trap 'rm -f "$tmp"' EXIT
+# at most 8 MiB, read with the user's own permissions
+runuser -u "$user" -- head -c 8388608 -- "$home/.face" > "$tmp" 2>/dev/null || { echo "cannot read ~/.face"; exit 0; }
+magic="$(head -c 8 "$tmp" | od -An -tx1 | tr -d ' \n')"
+case "$magic" in
+    ffd8ff*|89504e470d0a1a0a) ;;
+    *) echo "~/.face is not a JPEG or PNG; login picture left unchanged"; exit 0 ;;
+esac
+install -D -m644 -o root -g root "$tmp" "/usr/share/sddm/faces/$user.face.icon"
+echo "login picture updated for $user"

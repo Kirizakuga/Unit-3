@@ -37,6 +37,7 @@ HOME_PATHS=(
 SYS_PATHS=(
     /usr/share/sddm/themes/unit3
     /usr/share/sddm/faces/kiri.face.icon
+    /usr/local/bin/unit3-avatar-sync
     /etc/systemd/system/unit3-avatar@.path
     /etc/systemd/system/unit3-avatar@.service
     /etc/sddm/Xsetup-unit3

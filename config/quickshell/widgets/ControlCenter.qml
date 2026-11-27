@@ -1497,7 +1497,7 @@ ShellRoot {
                         spacing: 12
 
                         // Header
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             text: "QSHARE"
                             font.family: "JetBrains Mono"
                             font.pixelSize: 11
@@ -1511,7 +1511,7 @@ ShellRoot {
                         Item { width: 1; height: 4 }
 
                         // Label (envoi/réception)
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             width: parent.width
                             text: root.qshareLabel
                             font.family: "JetBrains Mono"
@@ -1541,7 +1541,7 @@ ShellRoot {
                                     asynchronous: true
                                 }
                                 // Loading state
-                                Text {
+                                Text { textFormat: Text.PlainText;
                                     anchors.centerIn: parent
                                     visible: root.qshareQrPath === ""
                                     text: "GENERATING…"
@@ -1555,7 +1555,7 @@ ShellRoot {
                         }
 
                         // URL en petit
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             width: parent.width
                             text: root.qshareUrl
                             font.family: "JetBrains Mono"
@@ -1567,7 +1567,7 @@ ShellRoot {
                         }
 
                         // Tick / Status
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             width: parent.width
                             text: root.qshareLastTick !== ""
                                   ? "✓ " + root.qshareLastTick
@@ -1592,7 +1592,7 @@ ShellRoot {
                         border.width: 1
                         Behavior on color { ColorAnimation { duration: 180 } }
 
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             anchors.centerIn: parent
                             text: root.qshareKeepAlive ? "× STOP" : "× CANCEL"
                             font.family: "JetBrains Mono"
@@ -1844,7 +1844,7 @@ ShellRoot {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 2
                     z: 4
-                    Text {
+                    Text { textFormat: Text.PlainText;
                         text: sl.title
                         font.family: "JetBrains Mono"
                         font.pixelSize: sl.isCenter ? 15 : 13
@@ -1854,7 +1854,7 @@ ShellRoot {
                         horizontalAlignment: sl.isCenter ? Text.AlignHCenter : Text.AlignLeft
                         anchors.horizontalCenter: sl.isCenter ? parent.horizontalCenter : undefined
                     }
-                    Text {
+                    Text { textFormat: Text.PlainText;
                         text: sl.subtitle
                         font.family: "JetBrains Mono"
                         font.pixelSize: sl.isCenter ? 9 : 10
@@ -1966,7 +1966,7 @@ ShellRoot {
                 anchors.topMargin: 18
                 spacing: 0
 
-                Text {
+                Text { textFormat: Text.PlainText;
                     id: detailH3
                     property string targetText: root.detailH3().toUpperCase()
                     text: targetText
@@ -2009,7 +2009,7 @@ ShellRoot {
                             NumberAnimation { to: 1.0; duration: 1100 }
                         }
                     }
-                    Text {
+                    Text { textFormat: Text.PlainText;
                         id: detailStatus
                         property string targetText: root.detailStatus()
                         text: targetText
@@ -2048,7 +2048,7 @@ ShellRoot {
                     visible: actCount > 0 || isNotifList   // toujours visible pour notifs (pour msg vide)
 
                     // Message si liste vide (notifs)
-                    Text {
+                    Text { textFormat: Text.PlainText;
                         anchors.centerIn: parent
                         visible: actListContainer.isNotifList && actListContainer.actCount === 0
                         text: "No notifications"
@@ -2149,7 +2149,7 @@ ShellRoot {
                         border.width: 1
                         Behavior on color { ColorAnimation { duration: 200 } }
 
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             anchors.centerIn: parent
                             text: "× CLEAR ALL"
                             font.family: "JetBrains Mono"
@@ -2279,7 +2279,7 @@ ShellRoot {
                         }
 
                         // Indication mute clickable
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             text: root.audioMuted ? "Muted · Click track to unmute" : "Right-click track to mute · Scroll to adjust"
                             font.family: "JetBrains Mono"
                             font.pixelSize: 9
@@ -2305,7 +2305,7 @@ ShellRoot {
                         anchors.topMargin: 14
                         spacing: 8
 
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             text: "PASSWORD · " + root.wifiPromptSSID
                             font.family: "JetBrains Mono"
                             font.pixelSize: 10
@@ -2370,7 +2370,7 @@ ShellRoot {
                         }
 
                         // Erreur si applicable
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             visible: root.wifiError !== ""
                             text: root.wifiError
                             font.family: "JetBrains Mono"
@@ -2384,7 +2384,7 @@ ShellRoot {
                             Rectangle {
                                 width: 110; height: 28
                                 color: root.colInk
-                                Text {
+                                Text { textFormat: Text.PlainText;
                                     anchors.centerIn: parent
                                     text: "CONNECT"
                                     font.family: "JetBrains Mono"
@@ -2403,7 +2403,7 @@ ShellRoot {
                                 color: "transparent"
                                 border.color: root.colInk
                                 border.width: 1
-                                Text {
+                                Text { textFormat: Text.PlainText;
                                     anchors.centerIn: parent
                                     text: "CANCEL"
                                     font.family: "JetBrains Mono"
@@ -2504,7 +2504,7 @@ ShellRoot {
             z: 3
         }
 
-        Text {
+        Text { textFormat: Text.PlainText;
             id: subTxt
             property string targetText: si.subItem.label
             text: targetText
@@ -2603,7 +2603,7 @@ ShellRoot {
             z: 3
         }
 
-        Text {
+        Text { textFormat: Text.PlainText;
             id: btnTxt
             property string targetText: btn.actionData.label.toUpperCase()
             text: targetText
@@ -2708,7 +2708,7 @@ ShellRoot {
             z: 2
 
             // App name (petit, en haut)
-            Text {
+            Text { textFormat: Text.PlainText;
                 id: appLabel
                 anchors.top: parent.top
                 anchors.left: parent.left
@@ -2722,7 +2722,7 @@ ShellRoot {
             }
 
             // Summary
-            Text {
+            Text { textFormat: Text.PlainText;
                 id: summaryLabel
                 anchors.top: appLabel.visible ? appLabel.bottom : parent.top
                 anchors.topMargin: appLabel.visible ? 1 : 0
@@ -2738,7 +2738,7 @@ ShellRoot {
             }
 
             // Body (visible quand expanded)
-            Text {
+            Text { textFormat: Text.PlainText;
                 id: bodyLabel
                 anchors.top: summaryLabel.bottom
                 anchors.topMargin: 4
@@ -2756,7 +2756,7 @@ ShellRoot {
             }
 
             // Metadata (visible quand expanded) : urgency, category, timeout, actions
-            Text {
+            Text { textFormat: Text.PlainText;
                 anchors.top: bodyLabel.visible ? bodyLabel.bottom : summaryLabel.bottom
                 anchors.topMargin: 4
                 anchors.left: parent.left
@@ -2791,7 +2791,7 @@ ShellRoot {
             anchors.verticalCenter: parent.verticalCenter
             z: 4
 
-            Text {
+            Text { textFormat: Text.PlainText;
                 anchors.centerIn: parent
                 text: nbtn.expanded ? "▾" : "▸"
                 font.family: "JetBrains Mono"

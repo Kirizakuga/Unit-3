@@ -65,6 +65,8 @@ ShellRoot {
     property string failedArt: ""
     readonly property string coverUrl: {
         var u = directArt !== "" ? directArt : lookedUpArt
+        // players (and web pages) choose this URL: only load https or local files
+        if (!/^(https:\/\/|file:\/\/)/i.test(u)) return ""
         return (u === failedArt && u.indexOf("maxresdefault") >= 0) ? u.replace("maxresdefault", "hqdefault") : u
     }
     // Last resort for players that send no art: look the track up in Apple's public iTunes catalog
@@ -74,7 +76,7 @@ ShellRoot {
         var key = (p.trackArtist || "") + " " + p.trackTitle
         if (key === lookedUpFor) return
         lookedUpFor = key; lookedUpArt = ""
-        artLookup.command = ["curl", "-s", "--max-time", "5",
+        artLookup.command = ["curl", "-s", "--max-time", "5", "--proto", "=https", "--proto-redir", "=https",
             "https://itunes.apple.com/search?entity=song&limit=1&term=" + encodeURIComponent(key.trim())]
         artLookup.running = true
     }
@@ -109,7 +111,7 @@ ShellRoot {
     property bool fastMode: Quickshell.env("UNIT3_LOCK_FAST") === "1"
 
     // ── Text with a cream backing, for readability over the grid ──
-    component Tag: Text { font.family: "JetBrains Mono";
+    component Tag: Text { textFormat: Text.PlainText; font.family: "JetBrains Mono";
         Rectangle {
             z: -1; color: "#d6cfb5"; opacity: 0.92
             x: parent.horizontalAlignment === Text.AlignRight ? parent.width - parent.contentWidth - 5 : -5
@@ -229,33 +231,34 @@ ShellRoot {
         stdout: SplitParser { onRead: data => { var u=data.trim(); if(u!=="") root.currentUser=u } }
     }
 
+    // Password check: pamtester runs directly (no shell) and gets the password on stdin.
+    // It never goes through an environment variable or the command line, both of which
+    // other processes of the same user can read from /proc.
     Process {
         id: authProc
-        command:["/bin/bash","-c",
-            "printf '%s\\n' \"$LOCKPWD\" | pamtester qs-lock \"$LOCKUSER\" authenticate >/dev/null 2>&1 && echo OK || echo FAIL"]
+        command: ["pamtester", "qs-lock", root.currentUser, "authenticate"]
+        stdinEnabled: true
         running: false
-        property string envPwd:""; property string envUser:""
-        environment:({"LOCKPWD":authProc.envPwd,"LOCKUSER":authProc.envUser})
-        stdout: StdioCollector { onStreamFinished: {
+        property string pending: ""
+        onStarted: { write(pending + "\n"); pending = "" }
+        onExited: function(exitCode, exitStatus) {
             root.lockPending = false
-            if (this.text.trim() === "OK") {
-                root.lockInput = ""
+            root.lockInput = ""
+            if (exitCode === 0) {
                 root.lockError = false
-                root.doHide()   // auth OK → lancer hide
+                root.doHide()   // password accepted
             } else {
                 root.lockError = true
-                root.lockInput = ""
                 errTimer.restart()
             }
-        }}
+        }
     }
     Timer { id:errTimer; interval:800; repeat:false; onTriggered: root.lockError=false }
 
     function doAuth() {
         if (root.lockPending || root.lockInput === "") return
         root.lockPending = true
-        authProc.envPwd  = root.lockInput
-        authProc.envUser = root.currentUser
+        authProc.pending = root.lockInput
         authProc.running = true
     }
 
@@ -400,7 +403,7 @@ ShellRoot {
                     anchors{bottom:parent.bottom;bottomMargin:65;left:parent.left;right:parent.right}
                     height:18;z:5;opacity:parent.uiOp;clip:true
                     Rectangle{anchors.fill:parent;color:"#d6cfb5";opacity:0.92}
-                    Text {
+                    Text { textFormat: Text.PlainText;
                         id:tickTxt
                         text:"SYSTEM SCAN · OK ▸ MEMORY INTEGRITY · VERIFIED ▸ SESSION LOCKED · SECURE ▸ NETWORK UPLINK · STABLE ▸ THERMAL · NOMINAL ▸ AUTH DAEMON · LISTENING ▸ "
                         font.family: "JetBrains Mono";font.pixelSize:10;font.letterSpacing:3;color:"#463f2e";y:2
@@ -500,19 +503,19 @@ ShellRoot {
                                     Rectangle{width:52;height:52;color:"#463f2e";anchors.centerIn:parent
                                         visible: avatar.status !== Image.Ready
                                         transform:Rotation{angle:45;origin.x:26;origin.y:26}}
-                                    Text{text:"NR";font.family: "JetBrains Mono";font.pixelSize:9;color:"#7a7358";opacity:0.5;anchors.top:parent.top;anchors.left:parent.left;anchors.margins:3
+                                    Text{ textFormat: Text.PlainText;text:"NR";font.family: "JetBrains Mono";font.pixelSize:9;color:"#7a7358";opacity:0.5;anchors.top:parent.top;anchors.left:parent.left;anchors.margins:3
                                         visible: avatar.status !== Image.Ready}
-                                    Text{text:"2B";font.family: "JetBrains Mono";font.pixelSize:9;color:"#7a7358";opacity:0.5;anchors.bottom:parent.bottom;anchors.right:parent.right;anchors.margins:3
+                                    Text{ textFormat: Text.PlainText;text:"2B";font.family: "JetBrains Mono";font.pixelSize:9;color:"#7a7358";opacity:0.5;anchors.bottom:parent.bottom;anchors.right:parent.right;anchors.margins:3
                                         visible: avatar.status !== Image.Ready}
                                 }
                             }
-                            Text{text:root.currentUser+"@"+root.node;width:parent.width;horizontalAlignment:Text.AlignHCenter;elide:Text.ElideRight;font.family: "JetBrains Mono";font.pixelSize:16;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{ textFormat: Text.PlainText;text:root.currentUser+"@"+root.node;width:parent.width;horizontalAlignment:Text.AlignHCenter;elide:Text.ElideRight;font.family: "JetBrains Mono";font.pixelSize:16;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:4}
-                            Text{text:"ユニット · アクティブ";font.family: "JetBrains Mono";font.pixelSize:10;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{ textFormat: Text.PlainText;text:"ユニット · アクティブ";font.family: "JetBrains Mono";font.pixelSize:10;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:20}
-                            Text{text:root.clockStr;font.family: "JetBrains Mono";font.pixelSize:46;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{ textFormat: Text.PlainText;text:root.clockStr;font.family: "JetBrains Mono";font.pixelSize:46;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:6}
-                            Text{text:root.dateStr;font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:3;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{ textFormat: Text.PlainText;text:root.dateStr;font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:3;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:20}
                             Rectangle{width:parent.width;height:1;color:Qt.rgba(70/255,63/255,46/255,0.22)}
                             Item{width:1;height:22}
@@ -521,7 +524,7 @@ ShellRoot {
                                 Rectangle{anchors.fill:parent;color:"transparent"
                                     border.color:inputScope.activeFocus?"#463f2e":Qt.rgba(70/255,63/255,46/255,0.22);border.width:1
                                     Behavior on border.color{ColorAnimation{duration:200}}}
-                                Text{ font.family: "JetBrains Mono";anchors.left:parent.left;anchors.leftMargin:10;anchors.verticalCenter:parent.verticalCenter;text:"▸";font.pixelSize:12;color:"#6e2a2a"}
+                                Text{ textFormat: Text.PlainText; font.family: "JetBrains Mono";anchors.left:parent.left;anchors.leftMargin:10;anchors.verticalCenter:parent.verticalCenter;text:"▸";font.pixelSize:12;color:"#6e2a2a"}
                                 FocusScope {
                                     id:inputScope
                                     anchors{fill:parent;leftMargin:26;rightMargin:10}
@@ -536,7 +539,7 @@ ShellRoot {
                                         onTextEdited: { root.lockInput=text }
                                         Keys.onReturnPressed: { root.doAuth() }
                                         Keys.onEscapePressed: { root.lockInput="" }
-                                        Text{visible:parent.text==="";anchors.verticalCenter:parent.verticalCenter
+                                        Text{ textFormat: Text.PlainText;visible:parent.text==="";anchors.verticalCenter:parent.verticalCenter
                                             text:"password...";font.family: "JetBrains Mono";font.pixelSize:13;font.italic:true;color:"#7a7358";opacity:0.5}
                                     }
                                 }
@@ -548,7 +551,7 @@ ShellRoot {
                                     Rectangle{visible:index<root.lockInput.length;anchors.fill:parent;color:"#463f2e"}}}}
                             Item{width:1;height:6}
 
-                            Text{text:"AUTHENTICATION FAILED";font.family: "JetBrains Mono";font.pixelSize:10;font.letterSpacing:2;color:"#6e2a2a"
+                            Text{ textFormat: Text.PlainText;text:"AUTHENTICATION FAILED";font.family: "JetBrains Mono";font.pixelSize:10;font.letterSpacing:2;color:"#6e2a2a"
                                 anchors.horizontalCenter:parent.horizontalCenter
                                 opacity:root.lockError?1:0;height:14;Behavior on opacity{NumberAnimation{duration:200}}}
                             Item{width:1;height:10}
@@ -557,7 +560,7 @@ ShellRoot {
                                 Rectangle{anchors.fill:parent;color:"transparent";border.color:"#463f2e";border.width:1}
                                 Rectangle{id:unlockFill;anchors.left:parent.left;anchors.top:parent.top;anchors.bottom:parent.bottom;color:"#463f2e";width:0
                                     Behavior on width{NumberAnimation{duration:280;easing.type:Easing.InOutQuart}}}
-                                Text{anchors.centerIn:parent;text:"Login";font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:3
+                                Text{ textFormat: Text.PlainText;anchors.centerIn:parent;text:"Login";font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:3
                                     color:unlockMA.containsMouse?"#d6cfb5":"#463f2e";Behavior on color{ColorAnimation{duration:200}}}
                                 MouseArea{id:unlockMA;anchors.fill:parent;hoverEnabled:true
                                     onEntered:unlockFill.width=parent.width;onExited:unlockFill.width=0
@@ -593,7 +596,7 @@ ShellRoot {
                         x: 16; y: 10; spacing: 6
                         Rectangle { width: 5; height: 5; radius: 3; color: "#6e2a2a"; anchors.verticalCenter: parent.verticalCenter
                             opacity: musicCard.p && musicCard.p.isPlaying ? 1 : 0.35 }
-                        Text { text: "NOW PLAYING · " + (musicCard.p ? String(musicCard.p.identity).toUpperCase() : "")
+                        Text { textFormat: Text.PlainText; text: "NOW PLAYING · " + (musicCard.p ? String(musicCard.p.identity).toUpperCase() : "")
                                font.family: "JetBrains Mono"; font.pixelSize: 10; font.letterSpacing: 2; color: "#7a7358" }
                     }
 
@@ -610,7 +613,7 @@ ShellRoot {
                             asynchronous: true
                             onStatusChanged: if (status === Image.Error) root.failedArt = String(source)
                         }
-                        Text { anchors.centerIn: parent; visible: art.status !== Image.Ready
+                        Text { textFormat: Text.PlainText; anchors.centerIn: parent; visible: art.status !== Image.Ready
                                text: "♪"; font.pixelSize: 26; color: "#463f2e" }
                     }
 
@@ -619,10 +622,10 @@ ShellRoot {
                         x: cover.x + cover.width + 14; y: 30
                         width: musicCard.width - x - 16
                         spacing: 3
-                        Text { width: parent.width; elide: Text.ElideRight
+                        Text { textFormat: Text.PlainText; width: parent.width; elide: Text.ElideRight
                                text: musicCard.p ? String(musicCard.p.trackTitle).replace(/^\(\d+\)\s*/, "").replace(/\s+-\s+YouTube( Music)?$/, "") : ""
                                font.family: "JetBrains Mono"; font.pixelSize: 14; font.weight: Font.Medium; color: "#463f2e" }
-                        Text { width: parent.width; elide: Text.ElideRight
+                        Text { textFormat: Text.PlainText; width: parent.width; elide: Text.ElideRight
                                text: musicCard.p ? (musicCard.p.trackArtist || musicCard.p.trackAlbum || "") : ""
                                font.family: "JetBrains Mono"; font.pixelSize: 12; color: "#7a7358" }
                         Item { width: 1; height: 6 }
@@ -638,7 +641,7 @@ ShellRoot {
                         }
                         Item {
                             width: parent.width; height: 26
-                            Text { anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
+                            Text { textFormat: Text.PlainText; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
                                    visible: musicCard.hasPos
                                    text: musicCard.p ? root.fmtTime(musicCard.p.position) + " / " + root.fmtTime(musicCard.p.length) : ""
                                    font.family: "JetBrains Mono"; font.pixelSize: 12; color: "#7a7358" }
@@ -657,7 +660,7 @@ ShellRoot {
                                         width: 34; height: 22
                                         color: btnMouse.containsMouse ? "#463f2e" : "transparent"
                                         border.color: "#463f2e"; border.width: 1
-                                        Text {
+                                        Text { textFormat: Text.PlainText;
                                             anchors.centerIn: parent
                                             text: modelData.act === "toggle"
                                                   ? (musicCard.p && musicCard.p.isPlaying ? "❚❚" : "▶") : modelData.glyph

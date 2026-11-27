@@ -35,22 +35,23 @@ if g:
     elif not m and re.search("Intel", g[0], re.I): name = "INTEL " + name
 print(os_ + (" · " + name.upper() if name else ""))')"
 
+# Only safe characters reach the root-run sed below (the settings file is user-writable)
+[[ "$node" =~ ^[A-Za-z0-9._-]{1,63}$ ]] || node=""
+sysTag="$(printf '%s' "$sysTag" | tr -cd 'A-Za-z0-9 ·._/+-' | cut -c1-60)"
+
 echo "Installing $DEST  (user $user, node '${node:-<hostname>}', '$sysTag')"
 sudo install -d "$DEST"
 sudo cp -r "$SRC/." "$DEST/"
 sudo sed -i -e "s|^node=.*|node=$node|" -e "s|^sysTag=.*|sysTag=$sysTag|" "$DEST/theme.conf"
-if [[ -f "$home/.face" ]]; then
-    sudo install -D -m644 "$home/.face" "/usr/share/sddm/faces/$user.face.icon"
-    echo "Avatar: $home/.face → /usr/share/sddm/faces/$user.face.icon"
-fi
-
-# Keep the login picture in sync automatically: a root path unit watches ~/.face and copies it
-# to the faces folder whenever it changes (no need to re-run this script for avatar changes).
+# Avatar: a root path unit watches ~/.face and updates the login picture whenever it changes.
+# The helper reads ~/.face as the user and accepts only JPEG/PNG (never follows a symlink as root).
 UNITS="$(dirname "$(readlink -f "$0")")/systemd"
 if [[ -d "$UNITS" ]]; then
-    sudo install -m644 "$UNITS/unit3-avatar@.path" "$UNITS/unit3-avatar@.service" /etc/systemd/system/
+    sudo install -m755 -o root -g root "$UNITS/unit3-avatar-sync" /usr/local/bin/unit3-avatar-sync
+    sudo install -m644 -o root -g root "$UNITS/unit3-avatar@.path" "$UNITS/unit3-avatar@.service" /etc/systemd/system/
     sudo systemctl daemon-reload
     sudo systemctl enable --now "unit3-avatar@$user.path"
+    sudo /usr/local/bin/unit3-avatar-sync "$user"
     echo "Avatar auto-sync: unit3-avatar@$user.path enabled"
 fi
 grep -E '^(node|sysTag)=' "$DEST/theme.conf"

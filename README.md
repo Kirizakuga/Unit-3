@@ -40,6 +40,16 @@
   `scripts/unit3-keep.sh` saves/checks/restores every customization.
 - **Fixes:** `ctrl.sh` no longer kills `cloudflared`; `ext_last_fr.py` no longer writes to a hard-coded home folder.
 
+### Security notes
+
+- The lockscreen is a real Wayland session lock; the password goes to `pamtester` over stdin (never an
+  environment variable or command line) and uses the normal system PAM rules (`faillock` included).
+- Text from outside sources (media titles, window titles, Wi-Fi/Bluetooth names) is rendered as plain text;
+  cover art is loaded only from `https://` or local files.
+- The root avatar helper reads `~/.face` with the user's own permissions and accepts only JPEG/PNG, so a
+  symlinked `~/.face` can't expose root-only files; its service is sandboxed.
+- Spicetify only gets write access to `/opt/spotify/Apps` (owned by the user); nothing is world-writable.
+
 ### Extra setup (not done by the installer)
 
 ```bash
@@ -51,6 +61,7 @@ mkdir -p ~/.local/share/color-schemes && cp config/color-schemes/Unit3.colors ~/
 cp -r config/spicetify/Themes/unit3 ~/.config/spicetify/Themes/ && spicetify config current_theme unit3 color_scheme unit3 && spicetify apply
 config/sddm/unit3-sddm-sync.sh && sudo cp config/sddm/10-unit3.conf /etc/sddm.conf.d/   # login theme + your avatar, name, distro/GPU
 sudo cp config/system/pacman-hooks/*.hook /etc/pacman.d/hooks/ && sudo install -m755 config/system/pacman-hooks/unit3-spotify-retheme /usr/local/bin/
+sudo chmod 755 /opt/spotify && sudo chown -R "$USER:$USER" /opt/spotify/Apps   # Spicetify: user-owned Apps, nothing world-writable
 cp config/Xresources ~/.Xresources   # X11 apps (Steam, Proton) get the same font smoothing and cursor
 ```
 

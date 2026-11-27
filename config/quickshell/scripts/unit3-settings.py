@@ -180,7 +180,11 @@ def set_key(key, value):
         data["lock"]["sleep"] = as_bool(value)
         save(data); write_hypridle(data)
     elif key == "lock.node":
-        data["lock"]["node"] = "" if value in ("", "-", "none") else value
+        if value in ("", "-", "none"):
+            value = ""
+        elif not re.fullmatch(r"[A-Za-z0-9._-]{1,63}", value):
+            sys.exit("lock.node: use letters, digits, '.', '_' or '-' (max 63)")
+        data["lock"]["node"] = value
         save(data)
     elif key == "power.profile":
         run(["powerprofilesctl", "set", value])

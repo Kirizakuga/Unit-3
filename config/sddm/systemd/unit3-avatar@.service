@@ -1,8 +1,19 @@
 # Copies /home/<user>/.face to SDDM's faces folder (started by unit3-avatar@<user>.path).
+# The helper reads the file as the user and only accepts JPEG/PNG; the service is sandboxed.
 [Unit]
 Description=Copy %i's avatar to the SDDM login screen
-ConditionPathExists=/home/%i/.face
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/install -D -m644 /home/%i/.face /usr/share/sddm/faces/%i.face.icon
+ExecStart=/usr/local/bin/unit3-avatar-sync %i
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/usr/share/sddm/faces
+ProtectHome=read-only
+PrivateTmp=yes
+PrivateNetwork=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes

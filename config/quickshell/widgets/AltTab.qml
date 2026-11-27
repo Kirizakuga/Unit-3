@@ -237,7 +237,7 @@ Scope {
                     }
                 }
 
-                Text {
+                Text { textFormat: Text.PlainText;
                     id: header
                     x: 24; y: 14; height: 24
                     text: "WINDOWS · " + root.wins.length + "      TAB next · W close · ESC cancel"
@@ -310,7 +310,7 @@ Scope {
                                     width: 16; height: 16; sourceSize: Qt.size(16, 16)
                                     source: Quickshell.iconPath(card.modelData.cls.toLowerCase(), "application-x-executable")
                                 }
-                                Text {
+                                Text { textFormat: Text.PlainText;
                                     anchors { left: icon.right; leftMargin: 8; right: wsTag.left; rightMargin: 8
                                               verticalCenter: parent.verticalCenter }
                                     text: card.modelData.title
@@ -318,7 +318,7 @@ Scope {
                                     font.family: root.fontName; font.pixelSize: 11
                                     color: card.isSel ? root.colDark : root.colSand
                                 }
-                                Text {
+                                Text { textFormat: Text.PlainText;
                                     id: wsTag
                                     anchors { right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter }
                                     text: card.modelData.minimized ? "MIN" : "WS " + card.modelData.ws
@@ -344,7 +344,7 @@ Scope {
                                 color: closeMouse.containsMouse ? "#6e2a2a" : root.colBg
                                 border.color: closeMouse.containsMouse ? "#c87060" : root.colSand
                                 border.width: 1
-                                Text {
+                                Text { textFormat: Text.PlainText;
                                     anchors.centerIn: parent
                                     text: "×"
                                     font.family: root.fontName; font.pixelSize: 16
