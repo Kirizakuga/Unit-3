@@ -402,7 +402,7 @@ ShellRoot {
                                     Text{text:"2B";font.family: "JetBrains Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.bottom:parent.bottom;anchors.right:parent.right;anchors.margins:3}
                                 }
                             }
-                            Text{text:root.currentUser.toUpperCase();font.family: "JetBrains Mono";font.pixelSize:13;font.letterSpacing:3;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{text:root.currentUser+"@arch";font.family: "JetBrains Mono";font.pixelSize:13;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:4}
                             Text{text:"ユニット · アクティブ";font.family: "JetBrains Mono";font.pixelSize:8;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:20}
