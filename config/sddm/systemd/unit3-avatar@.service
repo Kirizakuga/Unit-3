@@ -1,0 +1,8 @@
+# Copies /home/<user>/.face to SDDM's faces folder (started by unit3-avatar@<user>.path).
+[Unit]
+Description=Copy %i's avatar to the SDDM login screen
+ConditionPathExists=/home/%i/.face
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/install -D -m644 /home/%i/.face /usr/share/sddm/faces/%i.face.icon

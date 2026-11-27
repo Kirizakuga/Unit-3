@@ -33,6 +33,7 @@
   with album art, progress and ⏮ ⏯ ⏭ controls.
 - **SDDM login theme `unit3`** matching the lockscreen: your avatar, `user@host`, distro + GPU
   (`config/sddm/unit3-sddm-sync.sh` installs it and fills these in), plus an example Xsetup for monitor layout.
+  Changing `~/.face` updates the login picture automatically (`unit3-avatar@<user>.path`, enabled by the script).
 - **App themes in the same palette and JetBrains Mono:** GTK3/4 (`adw-gtk3` + `gtk.css`), Qt/KDE (`Unit3.colors`),
   kitty, Spotify (Spicetify theme `unit3`).
 - **Survives updates:** pacman hooks re-apply sand Papirus folders and the Spotify theme after every update;

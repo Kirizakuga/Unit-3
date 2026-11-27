@@ -1,0 +1,11 @@
+# Unit-3: when a user's ~/.face changes, update their picture on the SDDM login screen.
+# Enable per user:  sudo systemctl enable --now unit3-avatar@<user>.path
+[Unit]
+Description=Watch /home/%i/.face for the Unit-3 login screen
+
+[Path]
+PathChanged=/home/%i/.face
+Unit=unit3-avatar@%i.service
+
+[Install]
+WantedBy=multi-user.target

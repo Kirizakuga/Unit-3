@@ -37,6 +37,8 @@ HOME_PATHS=(
 SYS_PATHS=(
     /usr/share/sddm/themes/unit3
     /usr/share/sddm/faces/kiri.face.icon
+    /etc/systemd/system/unit3-avatar@.path
+    /etc/systemd/system/unit3-avatar@.service
     /etc/sddm/Xsetup-unit3
     /etc/sddm.conf
     /etc/sddm.conf.d
@@ -150,6 +152,11 @@ cmd_restore() {
         sudo chmod 755 /usr/local/bin/unit3-spotify-retheme /etc/sddm/Xsetup-unit3
         sudo papirus-folders -C paleorange --theme Papirus-Dark >/dev/null 2>&1 && note "folder icons: sand"
         [[ -f /opt/spotify/Apps/xpui.spa ]] && sudo /usr/local/bin/unit3-spotify-retheme
+        # login-screen avatar auto-sync
+        if [[ -f /etc/systemd/system/unit3-avatar@.path ]]; then
+            sudo systemctl daemon-reload && sudo systemctl enable --now "unit3-avatar@$USER.path" >/dev/null 2>&1 \
+                && note "avatar auto-sync enabled"
+        fi
     fi
     command -v hyprctl >/dev/null && hyprctl reload >/dev/null && note "Hyprland reloaded"
     hyprctl dispatch 'hl.dsp.exec_cmd("pkill -x qs; sleep 0.5; env QT_MEDIA_BACKEND=ffmpeg qs")' >/dev/null 2>&1 \

@@ -3,7 +3,8 @@
 #   - your avatar (~/.face → /usr/share/sddm/faces/<user>.face.icon)
 #   - the machine name shown as user@node (lock.node in quickshell settings, else the hostname)
 #   - the distro and GPU line (e.g. "CACHYOS · RTX 4050")
-# Run as your normal user (it asks for sudo); re-run after changing avatar, hostname or GPU.
+# Run as your normal user (it asks for sudo). Avatar changes are then synced automatically
+# (unit3-avatar@<user>.path); re-run only after changing the hostname, lock.node or GPU.
 set -euo pipefail
 
 SRC="$(dirname "$(readlink -f "$0")")/unit3"
@@ -41,5 +42,15 @@ sudo sed -i -e "s|^node=.*|node=$node|" -e "s|^sysTag=.*|sysTag=$sysTag|" "$DEST
 if [[ -f "$home/.face" ]]; then
     sudo install -D -m644 "$home/.face" "/usr/share/sddm/faces/$user.face.icon"
     echo "Avatar: $home/.face → /usr/share/sddm/faces/$user.face.icon"
+fi
+
+# Keep the login picture in sync automatically: a root path unit watches ~/.face and copies it
+# to the faces folder whenever it changes (no need to re-run this script for avatar changes).
+UNITS="$(dirname "$(readlink -f "$0")")/systemd"
+if [[ -d "$UNITS" ]]; then
+    sudo install -m644 "$UNITS/unit3-avatar@.path" "$UNITS/unit3-avatar@.service" /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now "unit3-avatar@$user.path"
+    echo "Avatar auto-sync: unit3-avatar@$user.path enabled"
 fi
 grep -E '^(node|sysTag)=' "$DEST/theme.conf"
