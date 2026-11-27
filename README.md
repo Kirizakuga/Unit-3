@@ -16,6 +16,8 @@
   - Open a page directly: `qs ipc call ctrl page display`
 - **Alt+Tab switcher** with live window previews: hold Alt, Tab / Shift+Tab to move, release to switch;
   W / Q / Delete or × closes a window without leaving the switcher.
+- **Shortcut cheat sheet:** `SUPER+/` lists every keybind, grouped, read live from Hyprland
+  (each bind has a `description = "Group · What it does"`).
 - **Minimize:** `SUPER+N` hides the focused window; it shows up in Alt+Tab tagged MIN, and picking it brings it back.
 - **Fix:** `SUPER+M` (Spotify scratchpad) works again on Hyprland 0.57.
 - **Lockscreen is a real session lock** (ext-session-lock): if it ever crashes the session stays locked,

@@ -17,7 +17,7 @@ hl.on("hyprland.start", function()
 end)
 
 -- Reliable app-menu shortcut (in addition to tapping SUPER)
-hl.bind("SUPER + Space", hl.dsp.exec_cmd("echo t >> /tmp/qs-menu"), { dont_inhibit = true })
+hl.bind("SUPER + Space", hl.dsp.exec_cmd("echo t >> /tmp/qs-menu"), { description = "Shell · App menu", dont_inhibit = true })
 
 -- ── Monitors ──
 -- Layout, refresh rates and primary screen are set in the Control Center (System > Display),
@@ -25,7 +25,7 @@ hl.bind("SUPER + Space", hl.dsp.exec_cmd("echo t >> /tmp/qs-menu"), { dont_inhib
 require("monitors")
 
 -- File manager
-hl.bind("SUPER + E", hl.dsp.exec_cmd("thunar"))
+hl.bind("SUPER + E", hl.dsp.exec_cmd("thunar"), { description = "Apps · File manager" })
 
 -- System update terminal (Control Center > System > Update): centered floating window
 hl.window_rule({
@@ -58,12 +58,12 @@ end
 
 hl.unbind("ALT + Tab")
 hl.unbind("ALT + SHIFT + Tab")
-hl.bind("ALT + Tab", function() hl.exec_cmd("qs ipc call alttab next"); watch_alt() end)
-hl.bind("ALT + SHIFT + Tab", function() hl.exec_cmd("qs ipc call alttab prev"); watch_alt() end)
+hl.bind("ALT + Tab", function() hl.exec_cmd("qs ipc call alttab next"); watch_alt() end, { description = "Windows · Switch windows" })
+hl.bind("ALT + SHIFT + Tab", function() hl.exec_cmd("qs ipc call alttab prev"); watch_alt() end, { description = "Windows · Switch windows, backwards" })
 
 -- Minimize: SUPER+N sends the focused window to a hidden workspace without leaving yours.
 -- Alt+Tab lists minimized windows (tagged MIN); picking one brings it back to your workspace.
-hl.bind("SUPER + N", hl.dsp.window.move({ workspace = "special:minimized", follow = false }))
+hl.bind("SUPER + N", hl.dsp.window.move({ workspace = "special:minimized", follow = false }), { description = "Windows · Minimize" })
 
 -- Spotify: SUPER+M shows/hides its scratchpad, or starts it if it isn't running.
 -- (hyprland.lua's version used the pre-0.57 "hyprctl dispatch togglespecialworkspace" syntax.)
@@ -76,8 +76,11 @@ hl.bind("SUPER + M", function()
         end
     end
     hl.exec_cmd("spotify")
-end)
+end, { description = "Apps · Spotify (show / hide)" })
 
 -- Real session lock (quickshell/lock/lockscreen.qml uses WlSessionLock): if the lockscreen ever
 -- crashes, the session stays locked; running the lock again (SUPER+L / lock.sh) takes it back over.
 hl.config({ misc = { allow_session_lock_restore = true } })
+
+-- Shortcut cheat sheet (quickshell/widgets/CheatSheet.qml), built from these descriptions
+hl.bind("SUPER + slash", hl.dsp.exec_cmd("qs ipc call cheatsheet toggle"), { description = "Shell · Shortcut cheat sheet" })
