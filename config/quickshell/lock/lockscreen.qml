@@ -361,37 +361,37 @@ ShellRoot {
                                 SequentialAnimation on opacity { running:root.frozen; loops:Animation.Infinite
                                     NumberAnimation{to:0.3;duration:900} NumberAnimation{to:1;duration:900} }
                             }
-                            Tag{text:"SESSION LOCKED";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                            Tag{text:"SESSION LOCKED";font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2;color:"#463f2e"}
                         }
-                        Tag{text:"NODE · "+root.currentUser+"@"+root.node;width:Math.min(implicitWidth,320);elide:Text.ElideRight;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
-                        Tag{text:"セッションロック中";font.family: "JetBrains Mono";font.pixelSize:8;color:"#463f2e";opacity:0.7}
+                        Tag{text:"NODE · "+root.currentUser+"@"+root.node;width:Math.min(implicitWidth,320);elide:Text.ElideRight;font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2;color:"#463f2e"}
+                        Tag{text:"セッションロック中";font.family: "JetBrains Mono";font.pixelSize:10;color:"#463f2e";opacity:0.7}
                     }
                 }
                 Item {
                     anchors { top:parent.top; right:parent.right; topMargin:28; rightMargin:30 }
                     z:5; opacity:parent.uiOp
                     Column { spacing:2; anchors.right:parent.right
-                        Tag{text:root.clockFull;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:200;horizontalAlignment:Text.AlignRight}
-                        Tag{text:root.dateStr;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:200;horizontalAlignment:Text.AlignRight}
-                        Tag{text:root.batText;visible:root.hasBattery;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2
-                            color: root.batLow ? "#6e2a2a" : "#463f2e";width:200;horizontalAlignment:Text.AlignRight}
+                        Tag{text:root.clockFull;font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2;color:"#463f2e";width:300;horizontalAlignment:Text.AlignRight}
+                        Tag{text:root.dateStr;font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2;color:"#463f2e";width:300;horizontalAlignment:Text.AlignRight}
+                        Tag{text:root.batText;visible:root.hasBattery;font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2
+                            color: root.batLow ? "#6e2a2a" : "#463f2e";width:300;horizontalAlignment:Text.AlignRight}
                         Tag{text:root.newNotifs + (root.newNotifs === 1 ? " NEW NOTIFICATION" : " NEW NOTIFICATIONS");visible:root.newNotifs > 0
-                            font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#6e2a2a";width:200;horizontalAlignment:Text.AlignRight}
+                            font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2;color:"#6e2a2a";width:300;horizontalAlignment:Text.AlignRight}
                     }
                 }
                 Item {
                     anchors { bottom:parent.bottom; left:parent.left; bottomMargin:28; leftMargin:30 }
                     z:5; opacity:parent.uiOp
                     Column { spacing:2; anchors.bottom:parent.bottom
-                        Tag{text:"KERNEL "+root.kernel;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
-                        Tag{text:"WM · hyprland";font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e"}
+                        Tag{text:"KERNEL "+root.kernel;font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2;color:"#463f2e"}
+                        Tag{text:"WM · hyprland";font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2;color:"#463f2e"}
                     }
                 }
                 Item {
                     anchors { bottom:parent.bottom; right:parent.right; bottomMargin:28; rightMargin:30 }
                     z:5; opacity:parent.uiOp
                     Column { spacing:2; anchors.bottom:parent.bottom; anchors.right:parent.right
-                        Tag{text:root.sysTag;elide:Text.ElideLeft;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:2;color:"#463f2e";width:220;horizontalAlignment:Text.AlignRight}
+                        Tag{text:root.sysTag;elide:Text.ElideLeft;font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2;color:"#463f2e";width:320;horizontalAlignment:Text.AlignRight}
                     }
                 }
 
@@ -403,7 +403,7 @@ ShellRoot {
                     Text {
                         id:tickTxt
                         text:"SYSTEM SCAN · OK ▸ MEMORY INTEGRITY · VERIFIED ▸ SESSION LOCKED · SECURE ▸ NETWORK UPLINK · STABLE ▸ THERMAL · NOMINAL ▸ AUTH DAEMON · LISTENING ▸ "
-                        font.family: "JetBrains Mono";font.pixelSize:8;font.letterSpacing:3;color:"#463f2e";y:2
+                        font.family: "JetBrains Mono";font.pixelSize:10;font.letterSpacing:3;color:"#463f2e";y:2
                         NumberAnimation on x { from:(modelData ? modelData.width : 1920); to:-tickTxt.implicitWidth; duration:55000; loops:Animation.Infinite; running:root.frozen }
                     }
                 }
@@ -500,19 +500,19 @@ ShellRoot {
                                     Rectangle{width:52;height:52;color:"#463f2e";anchors.centerIn:parent
                                         visible: avatar.status !== Image.Ready
                                         transform:Rotation{angle:45;origin.x:26;origin.y:26}}
-                                    Text{text:"NR";font.family: "JetBrains Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.top:parent.top;anchors.left:parent.left;anchors.margins:3
+                                    Text{text:"NR";font.family: "JetBrains Mono";font.pixelSize:9;color:"#7a7358";opacity:0.5;anchors.top:parent.top;anchors.left:parent.left;anchors.margins:3
                                         visible: avatar.status !== Image.Ready}
-                                    Text{text:"2B";font.family: "JetBrains Mono";font.pixelSize:7;color:"#7a7358";opacity:0.5;anchors.bottom:parent.bottom;anchors.right:parent.right;anchors.margins:3
+                                    Text{text:"2B";font.family: "JetBrains Mono";font.pixelSize:9;color:"#7a7358";opacity:0.5;anchors.bottom:parent.bottom;anchors.right:parent.right;anchors.margins:3
                                         visible: avatar.status !== Image.Ready}
                                 }
                             }
-                            Text{text:root.currentUser+"@"+root.node;width:parent.width;horizontalAlignment:Text.AlignHCenter;elide:Text.ElideRight;font.family: "JetBrains Mono";font.pixelSize:13;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{text:root.currentUser+"@"+root.node;width:parent.width;horizontalAlignment:Text.AlignHCenter;elide:Text.ElideRight;font.family: "JetBrains Mono";font.pixelSize:16;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:4}
-                            Text{text:"ユニット · アクティブ";font.family: "JetBrains Mono";font.pixelSize:8;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{text:"ユニット · アクティブ";font.family: "JetBrains Mono";font.pixelSize:10;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:20}
                             Text{text:root.clockStr;font.family: "JetBrains Mono";font.pixelSize:46;font.letterSpacing:2;color:"#463f2e";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:6}
-                            Text{text:root.dateStr;font.family: "JetBrains Mono";font.pixelSize:9;font.letterSpacing:3;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
+                            Text{text:root.dateStr;font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:3;color:"#7a7358";anchors.horizontalCenter:parent.horizontalCenter}
                             Item{width:1;height:20}
                             Rectangle{width:parent.width;height:1;color:Qt.rgba(70/255,63/255,46/255,0.22)}
                             Item{width:1;height:22}
@@ -521,7 +521,7 @@ ShellRoot {
                                 Rectangle{anchors.fill:parent;color:"transparent"
                                     border.color:inputScope.activeFocus?"#463f2e":Qt.rgba(70/255,63/255,46/255,0.22);border.width:1
                                     Behavior on border.color{ColorAnimation{duration:200}}}
-                                Text{ font.family: "JetBrains Mono";anchors.left:parent.left;anchors.leftMargin:10;anchors.verticalCenter:parent.verticalCenter;text:"▸";font.pixelSize:10;color:"#6e2a2a"}
+                                Text{ font.family: "JetBrains Mono";anchors.left:parent.left;anchors.leftMargin:10;anchors.verticalCenter:parent.verticalCenter;text:"▸";font.pixelSize:12;color:"#6e2a2a"}
                                 FocusScope {
                                     id:inputScope
                                     anchors{fill:parent;leftMargin:26;rightMargin:10}
@@ -529,7 +529,7 @@ ShellRoot {
                                     TextInput {
                                         id:pwInput;anchors.fill:parent
                                         verticalAlignment:TextInput.AlignVCenter
-                                        font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:2
+                                        font.family: "JetBrains Mono";font.pixelSize:14;font.letterSpacing:2
                                         color:"#463f2e";echoMode:TextInput.Password;passwordCharacter:"·"
                                         focus:true;readOnly:false
                                         text:root.lockInput
@@ -537,7 +537,7 @@ ShellRoot {
                                         Keys.onReturnPressed: { root.doAuth() }
                                         Keys.onEscapePressed: { root.lockInput="" }
                                         Text{visible:parent.text==="";anchors.verticalCenter:parent.verticalCenter
-                                            text:"password...";font.family: "JetBrains Mono";font.pixelSize:11;font.italic:true;color:"#7a7358";opacity:0.5}
+                                            text:"password...";font.family: "JetBrains Mono";font.pixelSize:13;font.italic:true;color:"#7a7358";opacity:0.5}
                                     }
                                 }
                             }
@@ -548,7 +548,7 @@ ShellRoot {
                                     Rectangle{visible:index<root.lockInput.length;anchors.fill:parent;color:"#463f2e"}}}}
                             Item{width:1;height:6}
 
-                            Text{text:"AUTHENTICATION FAILED";font.family: "JetBrains Mono";font.pixelSize:8;font.letterSpacing:2;color:"#6e2a2a"
+                            Text{text:"AUTHENTICATION FAILED";font.family: "JetBrains Mono";font.pixelSize:10;font.letterSpacing:2;color:"#6e2a2a"
                                 anchors.horizontalCenter:parent.horizontalCenter
                                 opacity:root.lockError?1:0;height:14;Behavior on opacity{NumberAnimation{duration:200}}}
                             Item{width:1;height:10}
@@ -557,7 +557,7 @@ ShellRoot {
                                 Rectangle{anchors.fill:parent;color:"transparent";border.color:"#463f2e";border.width:1}
                                 Rectangle{id:unlockFill;anchors.left:parent.left;anchors.top:parent.top;anchors.bottom:parent.bottom;color:"#463f2e";width:0
                                     Behavior on width{NumberAnimation{duration:280;easing.type:Easing.InOutQuart}}}
-                                Text{anchors.centerIn:parent;text:"Login";font.family: "JetBrains Mono";font.pixelSize:10;font.letterSpacing:3
+                                Text{anchors.centerIn:parent;text:"Login";font.family: "JetBrains Mono";font.pixelSize:12;font.letterSpacing:3
                                     color:unlockMA.containsMouse?"#d6cfb5":"#463f2e";Behavior on color{ColorAnimation{duration:200}}}
                                 MouseArea{id:unlockMA;anchors.fill:parent;hoverEnabled:true
                                     onEntered:unlockFill.width=parent.width;onExited:unlockFill.width=0
@@ -594,7 +594,7 @@ ShellRoot {
                         Rectangle { width: 5; height: 5; radius: 3; color: "#6e2a2a"; anchors.verticalCenter: parent.verticalCenter
                             opacity: musicCard.p && musicCard.p.isPlaying ? 1 : 0.35 }
                         Text { text: "NOW PLAYING · " + (musicCard.p ? String(musicCard.p.identity).toUpperCase() : "")
-                               font.family: "JetBrains Mono"; font.pixelSize: 8; font.letterSpacing: 2; color: "#7a7358" }
+                               font.family: "JetBrains Mono"; font.pixelSize: 10; font.letterSpacing: 2; color: "#7a7358" }
                     }
 
                     // cover
@@ -621,10 +621,10 @@ ShellRoot {
                         spacing: 3
                         Text { width: parent.width; elide: Text.ElideRight
                                text: musicCard.p ? String(musicCard.p.trackTitle).replace(/^\(\d+\)\s*/, "").replace(/\s+-\s+YouTube( Music)?$/, "") : ""
-                               font.family: "JetBrains Mono"; font.pixelSize: 12; font.weight: Font.Medium; color: "#463f2e" }
+                               font.family: "JetBrains Mono"; font.pixelSize: 14; font.weight: Font.Medium; color: "#463f2e" }
                         Text { width: parent.width; elide: Text.ElideRight
                                text: musicCard.p ? (musicCard.p.trackArtist || musicCard.p.trackAlbum || "") : ""
-                               font.family: "JetBrains Mono"; font.pixelSize: 10; color: "#7a7358" }
+                               font.family: "JetBrains Mono"; font.pixelSize: 12; color: "#7a7358" }
                         Item { width: 1; height: 6 }
                         Rectangle {
                             width: parent.width; height: 3
@@ -641,7 +641,7 @@ ShellRoot {
                             Text { anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
                                    visible: musicCard.hasPos
                                    text: musicCard.p ? root.fmtTime(musicCard.p.position) + " / " + root.fmtTime(musicCard.p.length) : ""
-                                   font.family: "JetBrains Mono"; font.pixelSize: 9; color: "#7a7358" }
+                                   font.family: "JetBrains Mono"; font.pixelSize: 12; color: "#7a7358" }
                             // controls
                             Row {
                                 anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
@@ -661,7 +661,7 @@ ShellRoot {
                                             anchors.centerIn: parent
                                             text: modelData.act === "toggle"
                                                   ? (musicCard.p && musicCard.p.isPlaying ? "❚❚" : "▶") : modelData.glyph
-                                            font.pixelSize: 9; font.letterSpacing: -1
+                                            font.pixelSize: 12; font.letterSpacing: -1
                                             color: btnMouse.containsMouse ? "#d6cfb5" : "#463f2e"
                                         }
                                         MouseArea {
