@@ -693,10 +693,10 @@ ShellRoot {
         var args = [qshareScriptPath, mode]
         if (mode === "send") {
             args.push(filePath)
-            qshareLabel = "envoi : " + filePath.split("/").pop()
+            qshareLabel = "sending: " + filePath.split("/").pop()
         } else {
             args.push("-o"); args.push(qshareOutputDir)
-            qshareLabel = "réception → " + qshareOutputDir.replace(home, "~")
+            qshareLabel = "receiving → " + qshareOutputDir.replace(home, "~")
         }
         if (qshareTunnel)    args.push("--tunnel")
         if (qshareKeepAlive) args.push("--keep-alive")
@@ -1389,7 +1389,7 @@ ShellRoot {
                     }
                     Slot {
                         slotKey: "top"
-                        title: "Connexion"
+                        title: "Connection"
                         subtitle: "Wi-Fi · Bluetooth"
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter

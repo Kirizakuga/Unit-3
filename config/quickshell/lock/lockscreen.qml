@@ -384,7 +384,7 @@ ShellRoot {
                                         Keys.onReturnPressed: { root.doAuth() }
                                         Keys.onEscapePressed: { root.lockInput="" }
                                         Text{visible:parent.text==="";anchors.verticalCenter:parent.verticalCenter
-                                            text:"mot de passe...";font.family: "JetBrains Mono";font.pixelSize:11;font.italic:true;color:"#7a7358";opacity:0.5}
+                                            text:"password...";font.family: "JetBrains Mono";font.pixelSize:11;font.italic:true;color:"#7a7358";opacity:0.5}
                                     }
                                 }
                             }
@@ -395,7 +395,7 @@ ShellRoot {
                                     Rectangle{visible:index<root.lockInput.length;anchors.fill:parent;color:"#463f2e"}}}}
                             Item{width:1;height:6}
 
-                            Text{text:"AUTHENTIFICATION ÉCHOUÉE";font.family: "JetBrains Mono";font.pixelSize:8;font.letterSpacing:2;color:"#6e2a2a"
+                            Text{text:"AUTHENTICATION FAILED";font.family: "JetBrains Mono";font.pixelSize:8;font.letterSpacing:2;color:"#6e2a2a"
                                 anchors.horizontalCenter:parent.horizontalCenter
                                 opacity:root.lockError?1:0;height:14;Behavior on opacity{NumberAnimation{duration:200}}}
                             Item{width:1;height:10}

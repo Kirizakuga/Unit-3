@@ -10,60 +10,60 @@ Item {
             name:  "AMAZON", color: "#c87060",
             src:   Qt.resolvedUrl("../assets/amazon.gif"),
             lines: [
-                "Tu tapes vite. Pas aussi vite qu'une hache.",
-                "Mon peuple n'a pas de pomodoro. On ne s'arrête pas.",
-                "Ce timer est inutile. Travaille.",
-                "Hmm. Bonne cadence. Continue.",
-                "En bataille, on ne compte pas les secondes.",
-                "Ma hache est plus précise que ton curseur.",
-                "Tu appelles ça de la productivité ?",
-                "Je n'ai pas besoin de pause. Toi peut-être."
+                "You type fast. Not as fast as an axe.",
+                "My people have no pomodoro. We don't stop.",
+                "That timer is useless. Work.",
+                "Hmm. Good pace. Keep going.",
+                "In battle, nobody counts the seconds.",
+                "My axe is more precise than your cursor.",
+                "You call that productivity?",
+                "I don't need a break. Maybe you do."
             ],
             reactions: [
-                { type: "angry",  text: "Arrête de me cliquer dessus ! Tu veux ma hache dans ton écran ?!" },
-                { type: "angry",  text: "C'EST MON DERNIER AVERTISSEMENT." },
-                { type: "bounce", text: "...D'accord. Tu gagnes. Je fais le saut. Content(e) ?" },
-                { type: "angry",  text: "Si tu cliques encore une fois... je jure par ma hache..." }
+                { type: "angry",  text: "Stop clicking me! Want my axe through your screen?!" },
+                { type: "angry",  text: "THIS IS MY LAST WARNING." },
+                { type: "bounce", text: "...Fine. You win. I'll jump. Happy now?" },
+                { type: "angry",  text: "Click me one more time... I swear by my axe..." }
             ]
         },
         {
             name:  "MAI SHIRANUI", color: "#c8a860",
             src:   Qt.resolvedUrl("../assets/mai.gif"),
             lines: [
-                "Tu pourrais taper plus gracieusement.",
-                "Ce n'est pas un timer, c'est une danse.",
-                "Mon éventail est plus rapide que ta souris.",
-                "Un peu plus d'élégance, s'il te plaît.",
-                "La vitesse sans grâce, c'est du bruit.",
-                "Tu travailles bien... pour quelqu'un sans éventail.",
-                "Encore une session ? Prends soin de toi.",
-                "Je préfère les fleurs aux terminaux."
+                "You could type a little more gracefully.",
+                "It's not a timer, it's a dance.",
+                "My fan is faster than your mouse.",
+                "A little more elegance, please.",
+                "Speed without grace is just noise.",
+                "You work well... for someone without a fan.",
+                "Another session? Take care of yourself.",
+                "I prefer flowers to terminals."
             ],
             reactions: [
-                { type: "love", text: "Oh... tu me remarques tant que ça ? *rougit*" },
-                { type: "love", text: "M-mais... tu es vraiment adorable !" },
-                { type: "spin", text: "Hihihi~ Je tourne pour toi !" },
-                { type: "love", text: "...Je crois que je me suis attachée à toi." }
+                { type: "love", text: "Oh... you notice me that much? *blushes*" },
+                { type: "love", text: "B-but... you're really adorable!" },
+                { type: "spin", text: "Hehehe~ I'll spin for you!" },
+                { type: "love", text: "...I think I've grown attached to you." }
             ]
         },
         {
             name:  "2B // YoRHa", color: "#c8b89a",
             src:   Qt.resolvedUrl("../assets/2b.gif"),
             lines: [
-                "Les émotions sont interdites. Pourtant... je veille.",
-                "Mission en cours. Continuez à travailler.",
-                "Système opérationnel. Anomalies : 0.",
-                "Pod : aucune menace détectée. Pour l'instant.",
-                "Nous combattons pour les humains. Même au clavier.",
+                "Emotions are prohibited. And yet... I keep watch.",
+                "Mission in progress. Continue working.",
+                "System operational. Anomalies: 0.",
+                "Pod: no threats detected. For now.",
+                "We fight for humanity. Even at the keyboard.",
                 "接続中... システム正常。",
-                "Ce timer compte chaque seconde. Comme moi.",
-                "La gloire aux androïdes. Et à votre WPM."
+                "This timer counts every second. As do I.",
+                "Glory to androids. And to your WPM."
             ],
             reactions: [
-                { type: "glow", text: "Comportement d'opérateur anormal détecté. Je note." },
-                { type: "glow", text: "Ce niveau d'interaction dépasse les paramètres normaux." },
-                { type: "glow", text: "Les émotions sont interdites. Mais... ce geste me semble familier." },
-                { type: "glow", text: "...Pod. Enregistre. L'opérateur me fait confiance." }
+                { type: "glow", text: "Abnormal operator behavior detected. Noted." },
+                { type: "glow", text: "This level of interaction exceeds normal parameters." },
+                { type: "glow", text: "Emotions are prohibited. But... this gesture feels familiar." },
+                { type: "glow", text: "...Pod. Record this. The operator trusts me." }
             ]
         }
     ]
