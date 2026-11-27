@@ -89,7 +89,7 @@ https://github-production-user-asset-6210df.s3.amazonaws.com/102748858/590523311
 
 ### Features
 
-- **Connexion** — Wi-Fi & Bluetooth
+- **Connection** — Wi-Fi & Bluetooth
   - Toggle radio on/off
   - Scan and connect to Wi-Fi networks with an inline password prompt (no external GUI)
   - List paired Bluetooth devices with connect/disconnect, pair, unpair, and live scan for new devices
