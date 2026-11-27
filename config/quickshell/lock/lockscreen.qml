@@ -9,24 +9,25 @@ ShellRoot {
     id: root
 
     // ── Music (MPRIS): shown once something plays while locked; stays if paused from here ──
-    property var  mprisPlayer: null
-    property bool musicLatched: false
-    function pickPlayer() {
+    // Reactive: re-evaluates the moment a player appears or starts/stops playing
+    // (the player list fills in over D-Bus just after this process starts).
+    readonly property var playingPlayer: {
         var ps = Mpris.players.values
         for (var i = 0; i < ps.length; i++) if (ps[i].isPlaying) return ps[i]
-        // nothing playing: keep the current one while it's still around (e.g. paused from the lockscreen)
-        for (var j = 0; j < ps.length; j++) if (ps[j] === mprisPlayer) return mprisPlayer
         return null
     }
+    property var  mprisPlayer: null
+    property bool musicLatched: false
+    onPlayingPlayerChanged: {
+        if (playingPlayer) { mprisPlayer = playingPlayer; musicLatched = true }
+        // nothing playing: keep the current one while it's still around (paused from here)
+        else if (mprisPlayer && Mpris.players.values.indexOf(mprisPlayer) < 0) mprisPlayer = null
+    }
+    // MPRIS doesn't push playback position: ask for it once a second while playing
     Timer {
-        interval: 500; running: !root.done; repeat: true; triggeredOnStart: true
-        onTriggered: {
-            root.mprisPlayer = root.pickPlayer()
-            if (root.mprisPlayer && root.mprisPlayer.isPlaying) {
-                root.musicLatched = true
-                root.mprisPlayer.positionChanged()   // MPRIS doesn't push position; ask for it
-            }
-        }
+        interval: 1000; repeat: true
+        running: !root.done && root.mprisPlayer !== null && root.mprisPlayer.isPlaying
+        onTriggered: root.mprisPlayer.positionChanged()
     }
     function fmtTime(sec) {
         if (!(sec > 0)) return "0:00"
