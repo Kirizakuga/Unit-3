@@ -534,6 +534,8 @@ ShellRoot {
                                         verticalAlignment:TextInput.AlignVCenter
                                         font.family: "JetBrains Mono";font.pixelSize:14;font.letterSpacing:2
                                         color:"#463f2e";echoMode:TextInput.Password;passwordCharacter:"·"
+                                        // password field: tell any input method to stay out (no IME composition, no prediction)
+                                        inputMethodHints: Qt.ImhSensitiveData | Qt.ImhHiddenText | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase | Qt.ImhPreferLatin
                                         focus:true;readOnly:false
                                         text:root.lockInput
                                         onTextEdited: { root.lockInput=text }

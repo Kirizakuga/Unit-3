@@ -237,7 +237,8 @@ Rectangle {
                         Image {
                             id: avatar
                             anchors.fill: parent; anchors.margins: 3
-                            source: root.userIcon ? "file://" + root.userIcon : ""
+                            // SDDM already gives a file:// URL; add the scheme only to a bare path
+                            source: !root.userIcon ? "" : (root.userIcon.indexOf("://") > 0 ? root.userIcon : "file://" + root.userIcon)
                             sourceSize: Qt.size(140, 140)
                             fillMode: Image.PreserveAspectCrop
                             smooth: true; mipmap: true
