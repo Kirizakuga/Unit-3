@@ -49,6 +49,10 @@
 - The root avatar helper reads `~/.face` with the user's own permissions and accepts only JPEG/PNG, so a
   symlinked `~/.face` can't expose root-only files; its service is sandboxed.
 - Spicetify only gets write access to `/opt/spotify/Apps` (owned by the user); nothing is world-writable.
+- The session locks before suspend (closing the lid), and suspend waits until the lock is up
+  (`inhibit_sleep = 3`); notification titles are plain text and notification images local-only.
+- Not covered by the rice: full-disk encryption. Without it, anyone with the laptop can read the disk;
+  use LUKS when (re)installing.
 
 ### Extra setup (not done by the installer)
 

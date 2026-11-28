@@ -38,7 +38,7 @@ BACKLIGHT = "amdgpu_bl2"
 DEFAULTS = {
     "display": {"primary": "DP-1", "side": "right", "wideColor": False,
                 "rates": {"eDP-2": 165.02, "DP-1": 200.0}},
-    "lock": {"idle": 10, "sleep": False, "node": ""},
+    "lock": {"idle": 10, "sleep": True, "node": ""},
     "shell": {"player": True, "playerBg": True, "companions": False},
 }
 
@@ -125,6 +125,8 @@ def write_hypridle(data):
             f"    lock_cmd = {LOCK_CMD}   # exits if already locked"]
     if lk["sleep"]:
         conf.append("    before_sleep_cmd = loginctl lock-session")
+        # suspend waits until the session lock is actually up (no unlocked desktop on resume)
+        conf.append("    inhibit_sleep = 3")
     conf.append("}")
     if int(lk["idle"]) > 0:
         conf += ["", "listener {",

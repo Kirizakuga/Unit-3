@@ -470,7 +470,7 @@ Scope {
                         Layout.preferredHeight: 14
                         color: notif.accentColor
 
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             id: urgLabel
                             anchors.centerIn: parent
                             text: notif.urgencyLabel
@@ -482,14 +482,14 @@ Scope {
                         }
                     }
 
-                    Text {
+                    Text { textFormat: Text.PlainText;
                         text: notif.urgencyJp
                         color: "#7a7358"
                         font.family: "JetBrains Mono"
                         font.pixelSize: 9
                     }
 
-                    Text {
+                    Text { textFormat: Text.PlainText;
                         Layout.fillWidth: true
                         text: notif.notification
                               ? (notif.notification.appName || "SYSTEM").toUpperCase()
@@ -501,7 +501,7 @@ Scope {
                         elide: Text.ElideRight
                     }
 
-                    Text {
+                    Text { textFormat: Text.PlainText;
                         text: {
                             const d = new Date();
                             const p = n => String(n).padStart(2, '0');
@@ -522,7 +522,7 @@ Scope {
 
                         Behavior on color { ColorAnimation { duration: 120 } }
 
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             anchors.centerIn: parent
                             text: "✕"
                             color: closeMouse.containsMouse ? "#d6cfb5" : "#463f2e"
@@ -564,7 +564,8 @@ Scope {
                             if (!notif.notification) return "";
                             // priorité à l'image embarquée, puis à l'appIcon
                             const img = notif.notification.image || "";
-                            if (img.length > 0) return img;
+                            // the sender (possibly a web page) chooses this: only local images, never network URLs
+                            if (img.length > 0 && /^(\/|file:\/\/|image:\/\/)/.test(img)) return img;
                             const appIcon = notif.notification.appIcon || "";
                             if (appIcon.length > 0) {
                                 // si c'est un chemin absolu
@@ -596,7 +597,7 @@ Scope {
                             color: notif.accentColor
                             z: 2
 
-                            Text {
+                            Text { textFormat: Text.PlainText;
                                 anchors.centerIn: parent
                                 text: String(notif.itemIndex + 1).padStart(2, '0')
                                 color: "#d6cfb5"
@@ -650,7 +651,7 @@ Scope {
                         Layout.alignment: Qt.AlignTop
                         spacing: 4
 
-                        Text {
+                        Text { textFormat: Text.PlainText;
                             Layout.fillWidth: true
                             text: notif.notification ? notif.notification.summary : ""
                             color: "#2e2a1f"
@@ -704,7 +705,7 @@ Scope {
 
                             Behavior on color { ColorAnimation { duration: 120 } }
 
-                            Text {
+                            Text { textFormat: Text.PlainText;
                                 id: actionText
                                 anchors.centerIn: parent
                                 text: `▸ ${(modelData && modelData.text ? modelData.text : "").toUpperCase()}`
